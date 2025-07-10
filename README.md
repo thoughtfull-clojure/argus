@@ -9,6 +9,7 @@ Extended and extensible types for JSON.
 ## Baseline versions
 
 - JVM: 21
+- Node: 20
 - Clojure: 1.12.0
 
 ## License
