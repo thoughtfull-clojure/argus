@@ -1,0 +1,63 @@
+name: Lint and test
+on: [push]
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: adopt
+          java-version: 17
+      - name: Setup
+        uses: DeLaGuardo/setup-clojure@13.2
+        with:
+          cli: 1.12.0.1479
+          clj-kondo: 2025.02.20
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.m2/repository
+            ~/.gitlibs
+            ~/.deps.clj
+          key: cljdeps-${{ hashFiles('deps.edn') }}
+          restore-keys: cljdeps-
+      - name: Lint
+        run: |
+          (echo '```';
+           clj-kondo --lint src --lint test --config '{:ignore [:deprecated-var :deprecated-namespace]}';
+           echo '```') >>$GITHUB_STEP_SUMMARY
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: adopt
+          java-version: 17
+      - name: Setup
+        uses: DeLaGuardo/setup-clojure@13.2
+        with:
+          cli: 1.12.0.1479
+          clj-kondo: 2025.02.20
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.m2/repository
+            ~/.gitlibs
+            ~/.deps.clj
+          key: cljdeps-${{ hashFiles('deps.edn') }}
+          restore-keys: cljdeps-
+      - name: Test
+        run: |
+          (echo '```';
+           clojure -X:test;
+           echo '```') >>$GITHUB_STEP_SUMMARY

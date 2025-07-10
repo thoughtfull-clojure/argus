@@ -1,0 +1,3 @@
+{:description "Extended and extensible types for JSON"
+ :lib systems.thoughtfull/argus
+ :version "0.1.0"}
