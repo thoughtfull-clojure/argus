@@ -1,0 +1,14 @@
+{
+    "name" : "argus",
+    "version" : "0.1.0",
+    "main" : "main.js",
+    "author" : "technosophist <technosophist@thoughtfull.systems>",
+    "scripts" : {
+        "clean" : "rm -rf target ; rm -rf .shadow-cljs",
+        "watch" : "shadow-cljs watch test",
+        "test" : "shadow-cljs compile test"
+    },
+    "devDependencies" : {
+        "shadow-cljs" : "^3.1.7"
+    }
+}

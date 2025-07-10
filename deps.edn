@@ -1,0 +1,4 @@
+{:aliases {:test {:extra-deps {com.cnuernber/charred {:mvn/version "1.037"}}
+                  :extra-paths ["test"]}}
+ :deps {org.clojure/clojure {:mvn/version "1.12.0"}}
+ :paths ["src"]}
