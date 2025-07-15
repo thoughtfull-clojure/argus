@@ -1,4 +1,4 @@
-(ns systems.thoughtfull.argus.platform
+(ns ^:no-doc systems.thoughtfull.argus.platform
   (:require
     [systems.thoughtfull.argus.utils :refer [ident]]))
 

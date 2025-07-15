@@ -1,4 +1,4 @@
-(ns systems.thoughtfull.argus.utils)
+(ns ^:no-doc systems.thoughtfull.argus.utils)
 
 (defn ident
   [o]
