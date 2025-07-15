@@ -100,7 +100,13 @@
     encoder))
 
 (defn argus
-  "Create an instance of argus that uses specified encoders and decoders for tagged values."
+  "Create an instance of argus that uses specified encoders and decoders for tagged values.
+  Encoders maps from type to either a function taking a single argument (the value) and returning
+  a tagged value or a vector with a tag and a function that takes a single argument (the value)
+  and returns the encoded value.
+
+  Decoders maps from a tag to a function taking a single value (the encoded value) and returns the
+  decoded value."
   [& {:keys [encoders decoders]}]
   (let [encoders' (merge default-encoders (zipmap (keys encoders) (map ->encoder (vals encoders))))]
     {:cache (atom encoders')

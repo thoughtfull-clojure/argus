@@ -1,4 +1,4 @@
-# Argus
+# argus
 
 <img align="left" src="./img/argus-logo-150.png" />
 
