@@ -4,17 +4,15 @@
 
 [![Lint and test](https://github.com/thoughtfull-clojure/argus/actions/workflows/lint-and-test.yml/badge.svg)](https://github.com/thoughtfull-clojure/argus/actions/workflows/lint-and-test.yml) [![clojars badge](https://badgen.net/badge/clojars/0.1.0/blue)](https://clojars.org/systems.thoughtfull/argus/versions/0.1.0) [![cljdoc badge](https://badgen.net/badge/cljdoc/0.1.0/blue)](https://cljdoc.org/d/systems.thoughtfull/argus/0.1.0/doc/readme)
 
-Extended and extensible types for JSON.  An implementation of [Argus](https://argus.fyi/)
+Extended and extensible types for JSON.  An implementation of [Argus](https://argus.fyi/).
+
+JSON is a popular, but anemic data format.  It supports four scalar types and two container types.  This is a far cry from the richness of the real world of programming languages, and yet ... it is a robust and universal foundation if only it supported tagged values.
 
 ## Baseline versions
 
 - JVM: 21
 - Node: 20
 - Clojure: 1.12.0
-
-## Summary
-
-JSON is a popular, but anemic data format.  It supports four scalar types and two container types.  This is a far cry from the richness of the real world of programming languages, and yet ... it is a robust and universal foundation if only it supported tagged values.
 
 ## Surprise! Tagged Values
 
