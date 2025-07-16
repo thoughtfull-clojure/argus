@@ -6,7 +6,7 @@
 
 Extended and extensible types for JSON.  An implementation of [Argus](https://argus.fyi/).
 
-JSON is a popular, but anemic data format.  It supports four scalar types and two container types.  This is a far cry from the richness of the real world of programming languages, and yet ... it is a robust and universal foundation if only it supported tagged values.
+JSON is a popular, but anemic data format.  It supports four scalar types and two container types.  This is a far cry from the richness of the real world of programming languages, and yet ... it is a robust and universal foundation if only it supported _tagged values_.
 
 ## Baseline versions
 
@@ -20,7 +20,9 @@ Tagged values are a good idea!  In the Clojure world there are two popular data 
 
 Argus and Transit both have tagged values and can be extended with new tags, both serialize to JSON.  The difference is Argus sticks closer to JSON by not supporting arbitrary objects as keys in a map and Argus is explicitly meant to be human readable.
 
-Argus also does not depend on any particular JSON library, so no more Jackson dependency nonsense.  Argus translates Clojure data into JSON compatible tagged Clojure values which can the library of your choosing can serialize to JSON.
+Argus also does not depend on any particular JSON library, so no more Jackson dependency nonsense.  Argus translates Clojure data into JSON compatible tagged Clojure values which the library of your choosing can serialize to JSON.
+
+Argus does not do any deduplication or compression.  Feel free to take the JSON output from your favorite library and run it through compression.
 
 ## Examples
 
