@@ -2,7 +2,7 @@
 
 <img align="left" src="./img/argus-logo-150.png" />
 
-[![Lint and test](https://github.com/thoughtfull-clojure/argus/actions/workflows/lint-and-test.yml/badge.svg)](https://github.com/thoughtfull-clojure/argus/actions/workflows/lint-and-test.yml) [![clojars badge](https://badgen.net/badge/clojars/0.1.0/blue)](https://clojars.org/systems.thoughtfull/argus/versions/0.1.0) [![cljdoc badge](https://badgen.net/badge/cljdoc/0.1.0/blue)](https://cljdoc.org/d/systems.thoughtfull/argus/0.1.0/doc/readme)
+[![Lint and test](https://github.com/thoughtfull-clojure/argus/actions/workflows/lint-and-test.yml/badge.svg)](https://github.com/thoughtfull-clojure/argus/actions/workflows/lint-and-test.yml) [![clojars badge](https://badgen.net/badge/clojars/0.2.0/blue)](https://clojars.org/systems.thoughtfull/argus/versions/0.2.0) [![cljdoc badge](https://badgen.net/badge/cljdoc/0.2.0/blue)](https://cljdoc.org/d/systems.thoughtfull/argus/0.2.0/doc/readme)
 
 Extended and extensible types for JSON.  An implementation of [Argus](https://argus.fyi/).
 
