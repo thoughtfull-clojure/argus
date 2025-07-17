@@ -1,6 +1,8 @@
 (ns ^:no-doc systems.thoughtfull.argus.platform
   (:require
-    [systems.thoughtfull.argus.utils :refer [ident]]))
+    [systems.thoughtfull.argus.utils :refer [ident]])
+  (:import
+    (goog.date Date)))
 
 (defn find-encoder
   [cache c]
@@ -12,18 +14,15 @@
   {cljs.core/PersistentHashSet (fn [o] {"#set" (vec o)})
    cljs.core/PersistentTreeSet (fn [o] {"#set" (vec o)})
    cljs.core/UUID (fn [o] {"#uuid" (str o)})
-   ;; java.time.LocalDate (fn [o] {"#date" (str o)})
-   ;; java.time.Instant (fn [o] {"#instant" (str o)})
-   ;; java.util.Date (fn [o] (java.util.Date/.toInstant o))
-   ;; java.sql.Date (fn [o] (java.sql.Date/.toLocalDate o))
-   ;; java.sql.Timestamp (fn [o] (java.sql.Timestamp/.toInstant o))
+   Date (fn [^Date o] {"#date" (.toIsoString o true)})
+   js/Date (fn [o] {"#instant" (.toISOString o)})
    cljs.core/Keyword (fn [o] {"#clojure/keyword" (ident o)})
    cljs.core/Symbol (fn [o] {"#clojure/symbol" (ident o)})})
 
 (def default-decoders
   {"#set" set
-   ;; "#date" java.time.LocalDate/parse
-   ;; "#instant" java.time.Instant/parse
    "#uuid" parse-uuid
+   "#date" #(Date/fromIsoString %)
+   "#instant" #(js/Date. %)
    "#clojure/keyword" keyword
    "#clojure/symbol" symbol})
