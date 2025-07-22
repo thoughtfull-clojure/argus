@@ -22,7 +22,7 @@ Argus and Transit both have tagged values and can be extended with new tags, bot
 
 Argus also does not depend on any particular JSON library, so no more Jackson dependency nonsense.  Argus translates Clojure data into JSON compatible tagged Clojure values which the library of your choosing can serialize to JSON.
 
-Argus does not do any deduplication or compression.  Feel free to take the JSON output from your favorite library and run it through compression.
+Argus does not do any deduplication or compression.  Feel free to take the JSON output from your favorite library and run it through gzip.
 
 ## Examples
 
