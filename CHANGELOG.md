@@ -29,6 +29,6 @@ project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.ht
 
 - Initial release.
 
-[unreleased]: https://github.com/thoughtfull-clojure/desiderata/compare/v0.2.0...main
-[0.2.0]: https://github.com/thoughtfull-clojure/desiderata/releases/tag/v0.1.0..v0.2.0
-[0.1.0]: https://github.com/thoughtfull-clojure/desiderata/releases/tag/v0.1.0
+[unreleased]: https://github.com/thoughtfull-clojure/argus/compare/v0.2.0...main
+[0.2.0]: https://github.com/thoughtfull-clojure/argus/releases/tag/v0.1.0..v0.2.0
+[0.1.0]: https://github.com/thoughtfull-clojure/argus/releases/tag/v0.1.0
