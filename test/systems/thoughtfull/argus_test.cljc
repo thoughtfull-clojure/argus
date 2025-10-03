@@ -24,12 +24,14 @@
 (deftest encode-keyword-properties
   (is (= {"foo" "bar"} (enargus (argus) {"foo" "bar"})))
   (is (= {":foo" "bar"} (enargus (argus) {:foo "bar"})))
+  (is (= {":foo/baz" "bar"} (enargus (argus) {:foo/baz "bar"})))
   (is (= {"::foo" "bar"} (enargus (argus) {":foo" "bar"})))
   (is (= {":::foo" "bar"} (enargus (argus) {"::foo" "bar"}))))
 
 (deftest decode-keyword-properties
   (is (= {"foo" "bar"} (deargus (argus) {"foo" "bar"})))
   (is (= {:foo "bar"} (deargus (argus) {":foo" "bar"})))
+  (is (= {:foo/baz "bar"} (deargus (argus) {":foo/baz" "bar"})))
   (is (= {":foo" "bar"} (deargus (argus) {"::foo" "bar"})))
   (is (= {"::foo" "bar"} (deargus (argus) {":::foo" "bar"}))))
 
