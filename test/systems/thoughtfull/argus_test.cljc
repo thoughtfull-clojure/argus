@@ -20,3 +20,24 @@
 (deftest decode-custom-type
   (is (= (->CustomType 1 2)
         (deargus (argus :decoders {"#my/type" (partial apply ->CustomType)}) {"#my/type" [1 2]}))))
+
+(deftest encode-keyword-properties
+  (is (= {"foo" "bar"} (enargus (argus) {"foo" "bar"})))
+  (is (= {":foo" "bar"} (enargus (argus) {:foo "bar"})))
+  (is (= {"::foo" "bar"} (enargus (argus) {":foo" "bar"})))
+  (is (= {":::foo" "bar"} (enargus (argus) {"::foo" "bar"}))))
+
+(deftest decode-keyword-properties
+  (is (= {"foo" "bar"} (deargus (argus) {"foo" "bar"})))
+  (is (= {:foo "bar"} (deargus (argus) {":foo" "bar"})))
+  (is (= {":foo" "bar"} (deargus (argus) {"::foo" "bar"})))
+  (is (= {"::foo" "bar"} (deargus (argus) {":::foo" "bar"}))))
+
+(deftest recursive-coding
+  (let [a (argus :encoders {CustomType ["#my/type" (juxt :a :b)]}
+            :decoders {"#my/type" (partial apply ->CustomType)})
+        u #uuid "111c2350-fbb5-4988-824b-f15506e896b1"]
+    (is (= {"#my/type" [1 {"#uuid" "111c2350-fbb5-4988-824b-f15506e896b1"}]}
+          (enargus a (->CustomType 1 u))))
+    (is (= (->CustomType 1 u)
+          (deargus a {"#my/type" [1 {"#uuid" "111c2350-fbb5-4988-824b-f15506e896b1"}]})))))

@@ -15,13 +15,32 @@
 
 (declare enargus*)
 
+(defn- enargus-key
+  [k]
+  (if (and (string? k)
+        (= ":" (subs k 0 1)))
+    (str ":" k)
+    (str k)))
+
 (defn- enargus-map
   [cache m]
   (if #?(:clj (instance? clojure.lang.IEditableCollection m) :cljs false)
-    (-> (reduce-kv (fn [m k v] (assoc! m k (enargus* cache v))) (transient m) m)
+    (-> (reduce-kv
+          (fn [m k v]
+            (let [k' (enargus-key k)]
+              (cond-> (assoc! m k' (enargus* cache v))
+                (not= k k') (dissoc! k))))
+          (transient m)
+          m)
       persistent!
       (with-meta (meta m)))
-    (reduce-kv (fn [m k v] (assoc m k (enargus* cache v))) m m)))
+    (reduce-kv
+      (fn [m k v]
+        (let [k' (enargus-key k)]
+          (cond-> (assoc m k' (enargus* cache v))
+            (not= k k') (dissoc k))))
+      m
+      m)))
 
 (defn- enargus-vector
   [cache v]
@@ -58,6 +77,18 @@
   (when (tagged-value? o)
     (first o)))
 
+(defn- deargus-key
+  [k]
+  (if (string? k)
+   (cond
+     (= "::" (subs k 0 2))
+     (subs k 1)
+     (= ":" (subs k 0 1))
+     (keyword (subs k 1))
+     :else
+     k)
+   k))
+
 (defn- deargus-map
   [argus m]
   (if-let [[t v] (tagged-value m)]
@@ -65,10 +96,22 @@
       (decoder (deargus argus v))
       m)
     (if #?(:clj (instance? clojure.lang.IEditableCollection m) :cljs false)
-      (-> (reduce-kv (fn [m k v] (assoc! m k (deargus argus v))) (transient m) m)
+      (-> (reduce-kv
+            (fn [m k v]
+              (let [k' (deargus-key k)]
+                (cond-> (assoc! m k' (deargus argus v))
+                  (not= k k') (dissoc! m k))))
+            (transient m)
+            m)
         persistent!
         (with-meta (meta m)))
-      (reduce-kv (fn [m k v] (assoc m k (deargus argus v))) m m))))
+      (reduce-kv
+        (fn [m k v]
+          (let [k' (deargus-key k)]
+            (cond-> (assoc m k' (deargus argus v))
+              (not= k k') (dissoc m k))))
+        m
+        m))))
 
 (defn- deargus-vector
   [argus v]

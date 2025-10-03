@@ -62,6 +62,20 @@ user> (argus/deargus a {"#my/type" [1 2]})
 #user.CustomType{:a 1, :b 2}
 ```
 
+## Testing
+
+Run Clojure tests with:
+
+```bash
+clojure -X:test
+```
+
+Run ClojureScript tests with:
+
+```bash
+npm run test && node target/test.js
+```
+
 ## License
 
 > Copyright © technosophist
