@@ -36,10 +36,12 @@
   (is (= {"::foo" "bar"} (deargus (argus) {":::foo" "bar"}))))
 
 (deftest recursive-coding
-  (let [a (argus :encoders {CustomType ["#my/type" (juxt :a :b)]}
-            :decoders {"#my/type" (partial apply ->CustomType)})
+  (let [a (argus :encoders {CustomType ["#my/type" #(into {} %)]}
+            :decoders {"#my/type" map->CustomType})
         u #uuid "111c2350-fbb5-4988-824b-f15506e896b1"]
-    (is (= {"#my/type" [1 {"#uuid" "111c2350-fbb5-4988-824b-f15506e896b1"}]}
-          (enargus a (->CustomType 1 u))))
-    (is (= (->CustomType 1 u)
-          (deargus a {"#my/type" [1 {"#uuid" "111c2350-fbb5-4988-824b-f15506e896b1"}]})))))
+    (is (= {"#my/type" {":a" {":c" 1 "::d" 2} ":b"
+                        {"#uuid" "111c2350-fbb5-4988-824b-f15506e896b1"}}}
+          (enargus a (->CustomType {:c 1 ":d" 2} u))))
+    (is (= (->CustomType {:c 1 ":d" 2} u)
+          (deargus a {"#my/type" {":a" {":c" 1 "::d" 2} ":b"
+                        {"#uuid" "111c2350-fbb5-4988-824b-f15506e896b1"}}})))))
