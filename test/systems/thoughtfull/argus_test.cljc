@@ -35,13 +35,22 @@
   (is (= {":foo" "bar"} (deargus (argus) {"::foo" "bar"})))
   (is (= {"::foo" "bar"} (deargus (argus) {":::foo" "bar"}))))
 
-(deftest recursive-coding
-  (let [a (argus :encoders {CustomType ["#my/type" #(into {} %)]}
-            :decoders {"#my/type" map->CustomType})
-        u #uuid "111c2350-fbb5-4988-824b-f15506e896b1"]
-    (is (= {"#my/type" {":a" {":c" 1 "::d" 2} ":b"
-                        {"#uuid" "111c2350-fbb5-4988-824b-f15506e896b1"}}}
-          (enargus a (->CustomType {:c 1 ":d" 2} u))))
-    (is (= (->CustomType {:c 1 ":d" 2} u)
-          (deargus a {"#my/type" {":a" {":c" 1 "::d" 2} ":b"
-                        {"#uuid" "111c2350-fbb5-4988-824b-f15506e896b1"}}})))))
+(deftest encode-nested
+  (is (= {"#my/type" {":a" {":c" 1 "::d" 2}
+                      ":b" {"#uuid" "111c2350-fbb5-4988-824b-f15506e896b1"}}}
+        (enargus (argus :encoders {CustomType ["#my/type" #(into {} %)]})
+          (->CustomType {:c 1 ":d" 2}
+            #uuid "111c2350-fbb5-4988-824b-f15506e896b1")))))
+
+(deftest decode-nested
+  (is (= (->CustomType {:c 1 ":d" 2} #uuid "111c2350-fbb5-4988-824b-f15506e896b1")
+        (deargus (argus :decoders {"#my/type" map->CustomType})
+          {"#my/type" {":a" {":c" 1 "::d" 2}
+                       ":b" {"#uuid" "111c2350-fbb5-4988-824b-f15506e896b1"}}}))))
+
+(deftest decode-unknown-tag
+  (is (= {"#unknown" {:foo #uuid "06ccea6d-0d8a-4f1f-a026-c30a3e12a481"}}
+        (deargus (argus) {"#unknown" {":foo" {"#uuid" "06ccea6d-0d8a-4f1f-a026-c30a3e12a481"}}})))
+  (is (= 42
+        (deargus (argus :default-decoder (constantly 42))
+          {"#unknown" {":foo" {"#uuid" "06ccea6d-0d8a-4f1f-a026-c30a3e12a481"}}}))))

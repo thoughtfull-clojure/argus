@@ -92,9 +92,11 @@
 (defn- deargus-map
   [argus m]
   (if-let [[t v] (tagged-value m)]
-    (if-let [decoder (get-in argus [:decoders t])]
-      (decoder (deargus argus v))
-      m)
+    (let [v' (deargus argus v)]
+      (if-some [decoder (or (get-in argus [:decoders t])
+                         (:default-decoder argus))]
+        (decoder v')
+        {t v'}))
     (if #?(:clj (instance? clojure.lang.IEditableCollection m) :cljs false)
       (-> (reduce-kv
             (fn [m k v]
@@ -150,8 +152,9 @@
 
   Decoders maps from a tag to a function taking a single value (the encoded value) and returns the
   decoded value."
-  [& {:keys [encoders decoders]}]
+  [& {:keys [encoders decoders default-decoder]}]
   (let [encoders' (merge default-encoders (zipmap (keys encoders) (map ->encoder (vals encoders))))]
     {:cache (atom encoders')
      :encoders encoders'
-     :decoders (merge default-decoders (zipmap (map valid-tag (keys decoders)) (vals decoders)))}))
+     :decoders (merge default-decoders (zipmap (map valid-tag (keys decoders)) (vals decoders)))
+     :default-decoder default-decoder}))
