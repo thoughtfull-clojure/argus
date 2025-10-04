@@ -96,10 +96,12 @@
   [argus m]
   (if-let [[t v] (tagged-value m)]
     (let [v' (deargus argus v)]
-      (if-some [decoder (or (get-in argus [:decoders t])
-                         (:default-decoder argus))]
+      (if-some [decoder (get-in argus [:decoders t])]
         (decoder v')
-        {t v'}))
+        (let [default-decoder (or (:default-decoder argus)
+                                (fn [t v]
+                                  {t v}))]
+          (default-decoder t v'))))
     (if #?(:clj (instance? clojure.lang.IEditableCollection m) :cljs false)
       (-> (reduce-kv
             (fn [m k v]

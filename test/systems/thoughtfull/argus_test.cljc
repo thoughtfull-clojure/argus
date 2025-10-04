@@ -115,6 +115,7 @@
 (deftest decode-unknown-tag
   (is (= {"#unknown" {:foo #uuid "06ccea6d-0d8a-4f1f-a026-c30a3e12a481"}}
         (deargus (argus) {"#unknown" {":foo" {"#uuid" "06ccea6d-0d8a-4f1f-a026-c30a3e12a481"}}})))
-  (is (= 42
-        (deargus (argus :default-decoder (constantly 42))
+  (is (= {:tag "#unknown"
+          :value {:foo #uuid "06ccea6d-0d8a-4f1f-a026-c30a3e12a481"}}
+        (deargus (argus :default-decoder (fn [t v] {:tag t :value v}))
           {"#unknown" {":foo" {"#uuid" "06ccea6d-0d8a-4f1f-a026-c30a3e12a481"}}}))))
