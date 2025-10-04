@@ -16,16 +16,23 @@
 (declare enargus*)
 
 (defn- enargus-key
-  "If a k is as string beginning with a colon then escape it, otherwise return the string of k."
+  "If a k is as string beginning with a colon or quote then escape it, otherwise return a string
+  representation of k."
   [k]
-  (if (and (string? k)
-        (= ":" (subs k 0 1)))
-    (str ":" k)
-    (str k)))
+  (if (and (string? k) (pos? (count k)))
+    (let [f (subs k 0 1)]
+      (cond
+        (= ":" f) (str ":" k)
+        (= "'" f) (str "'" k)
+        :else k))
+    (if (symbol? k)
+      (str "'" k)
+      (str k))))
 
 (defn- enargus-map
-  "Encode objects from the inside out.  Map keys are encoded specially so strings and keywords can
-  be distinguished (a keyword starts with a colon, a string starting with a colon is escaped)."
+  "Encode objects from the inside out.  Map keys are encoded specially so strings, symbols, and
+  keywords can be distinguished (a keyword starts with a colon, a symbol starts with a quote, a
+  string starting with a colon or quote is escaped)."
   [cache m]
   (if #?(:clj (instance? clojure.lang.IEditableCollection m) :cljs false)
     (-> (reduce-kv
@@ -74,13 +81,23 @@
   In addition keys in a map have a special encoding.  If a key is a keyword, then it is encoded as
   a string starting with a colon.  Keyword namespaces are preserved.
 
-  If a key is a string starting with a colon, then the colon is escaped by doubling it.
+  If a key is a symbol, then it is encoded as a string starting with a quote.  Symbol namespaces
+  are preserved.
+
+  If a key is a string starting with a colon or quote, then the colon or quote is escaped by
+  doubling it.
 
   Example:
 
   ```clojure
-  systems.thoughtfull.argus> (enargus (argus) {:key/word #{1}, \":string\" #{2}})
-  {\":key/word\" {\"#set\" [1]}, \"::string\" {\"#set\" [2]}}
+  systems.thoughtfull.argus> (enargus (argus) {:key/word #{1}
+                                               'sym/bol #{2}
+                                               \":not-keyword\" #{3}
+                                               \"'not-symbol\" #{4}})
+  {\":key/word\" {\"#set\" [1]},
+   \"'sym/bol\" {\"#set\" [2]},
+   \"::not-keyword\" {\"#set\" [3]},
+   \"''not-symbol\" {\"#set\" [4]}}
   ```
 
   -**`argus`** — an argus specification produced by [[argus]]
@@ -97,12 +114,14 @@
 
 (defn- deargus-key
   [k]
-  (if (string? k)
+  (if (and (string? k) (> (count k) 1))
    (cond
-     (= "::" (subs k 0 2))
+     (or (= "::" (subs k 0 2)) (= "''" (subs k 0 2)))
      (subs k 1)
      (= ":" (subs k 0 1))
      (keyword (subs k 1))
+     (= "'" (subs k 0 1))
+     (symbol (subs k 1))
      :else
      k)
    k))
@@ -156,15 +175,20 @@
   In addition keys in a map are decoded specially.  If a key is a string starting with a colon,
   then it is decoded as a keyword.  Keyword namespaces are preserved.
 
-  If a key is a string starting with two colons, then one colon is removed and the rest of the
-  string is returned unmodified.
+  If a key is a string starting with a quote, then it is decoded as a symbol.  Symbol namespaces
+  are preserved.
+
+  If a key is a string starting with two colons or two quotes, then one colon or quote is removed
+  and the rest of the string is returned unmodified.
 
   Example:
 
   ```clojure
   systems.thoughtfull.argus> (deargus (argus) {\":key/word\" {\"#set\" [1]},
-                                               \"::string\" {\"#set\" [2]}})
-  {:key/word #{1}, \":string\" #{2}}
+                                               \"'sym/bol\" {\"#set\" [2]},
+                                               \"::not-keyword\" {\"#set\" [3]},
+                                               \"''not-symbol\" {\"#set\" [4]}})
+  {:key/word #{1}, sym/bol #{2}, \":not-keyword\" #{3}, \"'not-symbol\" #{4}}
   ```
 
   -**`argus`** — an argus specification produced by [[argus]]

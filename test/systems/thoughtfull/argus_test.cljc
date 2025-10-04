@@ -79,19 +79,45 @@
   (is (= (->CustomType 1 2)
         (deargus (argus :decoders {"#my.type" (partial apply ->CustomType)}) {"#my.type" [1 2]}))))
 
-(deftest encode-keyword-properties
-  (is (= {"foo" "bar"} (enargus (argus) {"foo" "bar"})))
+(deftest encode-keyword-keys
   (is (= {":foo" "bar"} (enargus (argus) {:foo "bar"})))
-  (is (= {":foo/baz" "bar"} (enargus (argus) {:foo/baz "bar"})))
-  (is (= {"::foo" "bar"} (enargus (argus) {":foo" "bar"})))
-  (is (= {":::foo" "bar"} (enargus (argus) {"::foo" "bar"}))))
+  (is (= {":foo/baz" "bar"} (enargus (argus) {:foo/baz "bar"}))))
 
-(deftest decode-keyword-properties
-  (is (= {"foo" "bar"} (deargus (argus) {"foo" "bar"})))
+(deftest decode-keyword-keys
   (is (= {:foo "bar"} (deargus (argus) {":foo" "bar"})))
-  (is (= {:foo/baz "bar"} (deargus (argus) {":foo/baz" "bar"})))
+  (is (= {:foo/baz "bar"} (deargus (argus) {":foo/baz" "bar"}))))
+
+(deftest encode-symbol-keys
+  (is (= {"'foo" "bar"} (enargus (argus) {'foo "bar"})))
+  (is (= {"'foo/baz" "bar"} (enargus (argus) {'foo/baz "bar"}))))
+
+(deftest decode-symbol-keys
+  (is (= {'foo "bar"} (deargus (argus) {"'foo" "bar"})))
+  (is (= {'foo/baz "bar"} (deargus (argus) {"'foo/baz" "bar"}))))
+
+(deftest encode-string-keys
+  (is (= {"foo" "bar"} (enargus (argus) {"foo" "bar"})))
+  (is (= {"::" "bar"} (enargus (argus) {":" "bar"})))
+  (is (= {"::foo" "bar"} (enargus (argus) {":foo" "bar"})))
+  (is (= {":::foo" "bar"} (enargus (argus) {"::foo" "bar"})))
+  (is (= {"''" "bar"} (enargus (argus) {"'" "bar"})))
+  (is (= {"''foo" "bar"} (enargus (argus) {"'foo" "bar"})))
+  (is (= {"'''foo" "bar"} (enargus (argus) {"''foo" "bar"}))))
+
+(deftest decode-string-keys
+  (is (= {"foo" "bar"} (deargus (argus) {"foo" "bar"})))
+  (is (= {":" "bar"} (deargus (argus) {"::" "bar"})))
   (is (= {":foo" "bar"} (deargus (argus) {"::foo" "bar"})))
-  (is (= {"::foo" "bar"} (deargus (argus) {":::foo" "bar"}))))
+  (is (= {"::foo" "bar"} (deargus (argus) {":::foo" "bar"})))
+  (is (= {"'" "bar"} (deargus (argus) {"''" "bar"})))
+  (is (= {"'foo" "bar"} (deargus (argus) {"''foo" "bar"})))
+  (is (= {"''foo" "bar"} (deargus (argus) {"'''foo" "bar"}))))
+
+(deftest encode-empty-string-key
+  (is (= {"" "bar"} (enargus (argus) {"" "bar"}))))
+
+(deftest decode-empty-string-key
+  (is (= {"" "bar"} (deargus (argus) {"" "bar"}))))
 
 (deftest encode-nested
   (is (= {"#my.type" {":a" {":c" 1 "::d" 2}
