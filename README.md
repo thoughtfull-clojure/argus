@@ -29,7 +29,7 @@ A tagged value is a map with a single key/value pair where the key is a tag.  Fo
 {"#set" : [1]}
 ```
 
-For more information see the [Argus "manifesto."](https://argus.fyi/)
+*For more information see the [Argus "manifesto."](https://argus.fyi/)*
 
 Tagged values are a good idea!  In the Clojure world there are two popular data format with tagged
 values (EDN and Transit), so one could reasonably ask why another library/format/etc.?  In
