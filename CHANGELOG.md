@@ -17,6 +17,21 @@ project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.ht
 
 ### Fixed
 
+## [0.3.0] - 2025-10-04
+
+### Added
+
+ - Encode keywords, symbols, strings as map keys
+ - Validate encoder and decoder tags
+ - Validate tags for function encoder
+ - Test coverage
+ - Detailed documentation
+
+### Changed
+
+- Corrected tag validation.  No longer looks for slash, but dot to separate segments
+- Ensure Clojure and ClojureScript produce same Argus values
+
 ## [0.2.0] - 2025-07-17
 
 ### Added
@@ -29,6 +44,7 @@ project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.ht
 
 - Initial release.
 
-[unreleased]: https://github.com/thoughtfull-clojure/argus/compare/v0.2.0...main
+[unreleased]: https://github.com/thoughtfull-clojure/argus/compare/v0.3.0...main
+[0.3.0]: https://github.com/thoughtfull-clojure/argus/releases/tag/v0.2.0..v0.3.0
 [0.2.0]: https://github.com/thoughtfull-clojure/argus/releases/tag/v0.1.0..v0.2.0
 [0.1.0]: https://github.com/thoughtfull-clojure/argus/releases/tag/v0.1.0
