@@ -23,6 +23,14 @@ produce and consume JSON.  This JSON can be run through any JSON parser in any l
 stored and queried in a PostgreSQL database, it can easily be read with human eyeballs.  Yet,
 there's a big wooden horse hiding arbitrary data types in plain sight...tagged values.
 
+A tagged value is a map with a single key/value pair where the key is a tag.  For example:
+
+```json
+{"#set" : [1]}
+```
+
+For more information see the [Argus "manifesto."](https://argus.fyi/)
+
 Tagged values are a good idea!  In the Clojure world there are two popular data format with tagged
 values (EDN and Transit), so one could reasonably ask why another library/format/etc.?  In
 particular Argus overlaps heavily with Transit.
