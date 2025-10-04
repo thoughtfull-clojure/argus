@@ -56,7 +56,7 @@
 (defn- enargus*
   [cache o]
   (cond
-    (or (nil? o) (boolean? o) (integer? o) (double? o) (string? o))
+    (or (nil? o) (boolean? o) (int? o) (double? o) (string? o))
     o
     (and (map? o) (not (record? o)))
     (enargus-map cache o)

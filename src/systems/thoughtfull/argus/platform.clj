@@ -2,7 +2,9 @@
   (:require
     [systems.thoughtfull.argus.utils :refer [ident]])
   (:import
-    (clojure.lang Ratio)))
+    (clojure.lang Ratio)
+    (java.time ZoneOffset)
+    (java.time.format DateTimeFormatter)))
 
 (defn- find-base-encoder
   [cache c]
@@ -33,7 +35,10 @@
 (def default-encoders
   {clojure.lang.IPersistentSet (fn [o] {"#set" (vec o)})
    java.time.LocalDate (fn [o] {"#date" (str o)})
-   java.time.Instant (fn [o] {"#instant" (str o)})
+   java.time.Instant (fn [o]
+                       {"#instant"
+                        (let [f (DateTimeFormatter/ofPattern "yyyy-MM-dd'T'HH:mm:ss.SSSX")]
+                          (.format f (.atOffset o (ZoneOffset/of "Z"))))})
    java.util.Date (fn [o] (java.util.Date/.toInstant o))
    java.sql.Date (fn [o] (java.sql.Date/.toLocalDate o))
    java.sql.Timestamp (fn [o] (java.sql.Timestamp/.toInstant o))
@@ -41,7 +46,7 @@
    clojure.lang.Keyword (fn [o] {"#clojure/keyword" (ident o)})
    clojure.lang.Symbol (fn [o] {"#clojure/symbol" (ident o)})
    clojure.lang.BigInt (fn [o] {"#clojure/bigint" (str o)})
-   java.math.BigInteger (fn [o] {"#clojure/bigint" (str o)})
+   java.math.BigInteger (fn [o] {"#clojure/biginteger" (str o)})
    java.math.BigDecimal (fn [o] {"#clojure/bigdec" (str o)})
    Ratio (fn [^Ratio o] {"#clojure/ratio" [(.numerator o) (.denominator o)]})})
 
@@ -53,5 +58,6 @@
    "#clojure/keyword" keyword
    "#clojure/symbol" symbol
    "#clojure/bigint" bigint
+   "#clojure/biginteger" biginteger
    "#clojure/bigdec" bigdec
    "#clojure/ratio" (fn [[num denom]] (Ratio. num denom))})

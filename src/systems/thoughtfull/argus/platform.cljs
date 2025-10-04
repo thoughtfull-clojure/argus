@@ -21,8 +21,8 @@
 
 (def default-decoders
   {"#set" set
-   "#uuid" parse-uuid
    "#date" #(Date/fromIsoString %)
    "#instant" #(js/Date. %)
+   "#uuid" parse-uuid
    "#clojure/keyword" keyword
    "#clojure/symbol" symbol})
