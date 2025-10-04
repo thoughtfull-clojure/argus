@@ -6,7 +6,9 @@
 
 Extended and extensible types for JSON.  An implementation of [Argus](https://argus.fyi/).
 
-JSON is a popular, but anemic data format.  It supports four scalar types and two container types.  This is a far cry from the richness of the real world of programming languages, and yet ... it is a robust and universal foundation if only it supported _tagged values_.
+JSON is a popular, but anemic data format.  It supports four scalar types and two container types.
+This is a far cry from the richness of the real world of programming languages, and yet ... it is a
+robust and universal foundation if only it supported _tagged values_.
 
 ## Baseline versions
 
@@ -14,15 +16,31 @@ JSON is a popular, but anemic data format.  It supports four scalar types and tw
 - Node: 20
 - Clojure: 1.12.0
 
-## Surprise! Tagged Values
+## Yet Another Data Format
 
-Tagged values are a good idea!  In the Clojure world there are two popular data format with tagged values (EDN and Transit), so one could reasonably ask why another library/format/etc.?  In particular Argus overlaps heavily with Transit.
+I get it.  I'm not trying to [xkcd](https://xkcd.com/927/) a data format.  My goal here is to
+produce and consume JSON.  This JSON can be run through any JSON parser in any language, it can be
+stored and queried in a PostgreSQL database, it can easily be read with human eyeballs.  Yet,
+there's a big wooden horse hiding arbitrary data types in plain sight...tagged values.
 
-Argus and Transit both have tagged values and can be extended with new tags, both serialize to JSON.  The difference is Argus sticks closer to JSON by not supporting arbitrary objects as keys in a map and Argus is explicitly meant to be human readable.
+Tagged values are a good idea!  In the Clojure world there are two popular data format with tagged
+values (EDN and Transit), so one could reasonably ask why another library/format/etc.?  In
+particular Argus overlaps heavily with Transit.
 
-Argus also does not depend on any particular JSON library, so no more Jackson dependency nonsense.  Argus translates Clojure data into JSON compatible tagged Clojure values which the library of your choosing can serialize to JSON.
+### What argus does
 
-Argus does not do any deduplication or compression.  Feel free to take the JSON output from your favorite library and run it through gzip.
+- Encode local date, instant, set, and uuid values.
+- Produce human readable values.
+- Produce standard JSON values.
+- Extend encoding for arbitrary types.
+
+## What argus does not do
+
+- Support arbitrary objects as map keys (keys must be keywords, symbols, or strings).
+- Depend on Jackson and all its nonsense
+- Include a JSON reader/writer (you need to bring your own and could use Jackson if you like
+  nonsense)
+- Deduplicate or compress any values (you can compress the resulting JSON, if you'd like)
 
 ## Examples
 
