@@ -14,7 +14,7 @@ robust and universal foundation if only it supported _tagged values_.
 
 - JVM: 21
 - Node: 20
-- Clojure: 1.12.0
+- Clojure: 1.12.3
 
 ## Yet Another Data Format
 
@@ -31,23 +31,23 @@ A tagged value is a map with a single key/value pair where the key is a tag.  Fo
 
 *For more information see the [Argus "manifesto."](https://argus.fyi/)*
 
-Tagged values are a good idea!  In the Clojure world there are two popular data format with tagged
-values (EDN and Transit), so one could reasonably ask why another library/format/etc.?  In
-particular Argus overlaps heavily with Transit.
+Tagged values are a good idea!  In the Clojur/Script world there are two popular data format with
+tagged values (EDN and Transit), so one could reasonably ask why another library/format/etc.?  In
+particular Argus overlaps with Transit.
 
 ### What argus does
 
-- Encode local date, instant, set, and uuid values.
-- Produce human readable values.
-- Produce standard JSON values.
+- Encode local date, instant, set, and UUID values.
 - Extend encoding for arbitrary types.
+- Produce standard JSON values.
+- Produce human readable values.
 
 ## What argus does not do
 
 - Support arbitrary objects as map keys (keys must be keywords, symbols, or strings).
-- Depend on Jackson and all its nonsense
+- Depend on Jackson and all its dependency nonsense
 - Include a JSON reader/writer (you need to bring your own and could use Jackson if you like
-  nonsense)
+  dependency nonsense)
 - Deduplicate or compress any values (you can compress the resulting JSON, if you'd like)
 
 ## Examples
