@@ -69,9 +69,24 @@
     (enargus-object cache o)))
 
 (defn enargus
-  "Rewrite o as JSON with tagged values according to the encoders in the given argus instance."
-  [argus o]
-  (enargus* (:cache argus) o))
+  "Encode arbitrary Clojure values into JSON-compatible tagged values.
+
+  In addition keys in a map have a special encoding.  If a key is a keyword, then it is encoded as
+  a string starting with a colon.  Keyword namespaces are preserved.
+
+  If a key is a string starting with a colon, then the colon is escaped by doubling it.
+
+  Example:
+
+  ```clojure
+  systems.thoughtfull.argus> (enargus (argus) {:key/word #{1}, \":string\" #{2}})
+  {\":key/word\" {\"#set\" [1]}, \"::string\" {\"#set\" [2]}}
+  ```
+
+  -**`argus`** — an argus specification produced by [[argus]]
+  -**`value`** — a JSON-compatible tagged value to encode"
+  [argus value]
+  (enargus* (:cache argus) value))
 
 (declare deargus)
 
@@ -92,16 +107,27 @@
      k)
    k))
 
+(defn default-decoder
+  "Takes a tag and value and returns a tagged value.
+
+  Example:
+
+  ```clojure
+  user> (default-decoder \"#foo.bar\" 42)
+  {\"#foo.bar\" 42}
+  ```"
+  [tag value]
+  {tag value})
+
 (defn- deargus-map
   [argus m]
   (if-let [[t v] (tagged-value m)]
     (let [v' (deargus argus v)]
       (if-some [decoder (get-in argus [:decoders t])]
         (decoder v')
-        (let [default-decoder (or (:default-decoder argus)
-                                (fn [t v]
-                                  {t v}))]
-          (default-decoder t v'))))
+        (let [decoder (or (:default-decoder argus)
+                        default-decoder)]
+          (decoder t v'))))
     (if #?(:clj (instance? clojure.lang.IEditableCollection m) :cljs false)
       (-> (reduce-kv
             (fn [m k v]
@@ -125,17 +151,34 @@
   (into (empty v) (map (partial deargus argus)) v))
 
 (defn deargus
-  "Rewrite o as Clojure/Java values according to the decoders in the given argus instance."
-  [argus o]
-  (cond
-    (map? o)
-    (deargus-map argus o)
-    (vector? o)
-    (deargus-vector argus o)
-    :else
-    o))
+  "Decode JSON-compatible tagged values into arbitrary Clojure values.
 
-(def tag-re
+  In addition keys in a map are decoded specially.  If a key is a string starting with a colon,
+  then it is decoded as a keyword.  Keyword namespaces are preserved.
+
+  If a key is a string starting with two colons, then one colon is removed and the rest of the
+  string is returned unmodified.
+
+  Example:
+
+  ```clojure
+  systems.thoughtfull.argus> (deargus (argus) {\":key/word\" {\"#set\" [1]},
+                                               \"::string\" {\"#set\" [2]}})
+  {:key/word #{1}, \":string\" #{2}}
+  ```
+
+  -**`argus`** — an argus specification produced by [[argus]]
+  -**`value`** — a JSON-compatible tagged value to decode"
+  [argus value]
+  (cond
+    (map? value)
+    (deargus-map argus value)
+    (vector? value)
+    (deargus-vector argus value)
+    :else
+    value))
+
+(def ^:private tag-re
   #"#((?:[a-zA-Z0-9-_]+\.)*(?:[a-zA-Z0-9-_]+))\.[a-zA-Z0-9-_]+")
 
 (defn- tag-namespace
@@ -168,13 +211,62 @@
     t'))
 
 (defn argus
-  "Create an instance of argus that uses specified encoders and decoders for tagged values.
-  Encoders maps from type to either a function taking a single argument (the value) and returning
-  a tagged value or a vector with a tag and a function that takes a single argument (the value)
-  and returns the encoded value.
+  "Create a specification for encoding/decoding arbitrary Clojure values into JSON-compatible values
+  and tagged values (a map with a single key/value pair where the key is a valid tag).  A
+  specification is thread safe.  Because it caches lookups reusing a specification improves
+  performance and is encouraged.
 
-  Decoders maps from a tag to a function taking a single value (the encoded value) and returns the
-  decoded value."
+  Every specification will have encoders and decoders for the standard argus tags: #date, #instant,
+  #set, #uuid.
+
+  A specification may be extended with encoders and decoders for arbitrary types.  Each encoder
+  and decoder is associated with an extension tag.  An extension tag must begin with an octothorpe
+  and contain at least two name segments separated by a period.  A name segment may contain
+  alphanumerics, dash, and underscore.  For example: '#clojure.keyword'.
+
+  Encoding is dispatched on a type.  If no suitable encoder can be found for a dispatch type,
+  argus will look for an encoder for a superclass or interface, and if found it will cache the
+  encoder for the dispatch type.  If a suitable encoder still cannot be found, then an error is
+  thrown.
+
+  An encoder can have two forms.  The first form is a vector of two elements the first being a
+  valid extension tag and the second element being a single-argument function to encode an
+  object. The second encoder form is a single-argument function taking an object and returning a
+  tagged value.
+
+  The first encoder form, the vector form, the preferred form, will have its tag validated once
+  upon construction of the specification.  If the tag is not a valid extension tag, then an error
+  is thrown.
+
+  The second encoder form, the function form, will be wrapped in a function that validates the tag
+  of every tagged value produced.  If the tag produced is not a valid extension tag, then an error
+  is thrown.
+
+  argus only validates tags and does not validate that encoded values are JSON compatible.  This
+  is up to you and/or the JSON encoding library you use.
+
+  Decoding is dispatched on a tag.  If no suitable decoder can be found for the tag, then a
+  default decoder, if specified, is used.  A decoder is a single-argument function taking an
+  already decoded value from which it produces a value of an arbitrary non-JSON-compatible type.
+
+  The default decoder is a two-argument function taking the tag and an already decoded value from
+  which it produces a value of an arbitrary non-JSON-compatible type.  If no default decoder is
+  specified, then the default default decoder will return a tagged value.
+
+  Each decoder tag in the specification is validated, and if a tag is not a valid extension tag,
+  then an error is thrown.
+
+  Example:
+
+  ```clojure
+  systems.thoughtfull.argus> (argus :encoders {MyType [\"#my.type\" my-type-encoder]}
+                               :decoders {\"#my.type\" my-type-decoder}
+                               :default-decoder (fn [t v] :unknown-value))
+  ```
+
+  - **`encoders`** (optional) — a map from type to encoder
+  - **`decoders`** (optional) — a map from extension tag to decoder
+  - **`default-decoder`** (optional) — a two-argument function, defaults to `default-decoder`."
   [& {:keys [encoders decoders default-decoder]}]
   (let [encoders' (merge default-encoders (zipmap (keys encoders) (map ->encoder (vals encoders))))]
     {:cache (atom encoders')
