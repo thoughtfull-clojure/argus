@@ -30,19 +30,19 @@
 (deftest encode-clojure-types
   (let [a (argus)]
     (are [e o] (= e (enargus a o))
-      {"#clojure/keyword" "foo/bar"} :foo/bar
-      {"#clojure/symbol" "foo/bar"} 'foo/bar
-      {"#clojure/bigint" "9223372036854775808"} 9223372036854775808N
-      {"#clojure/biginteger" "42"} (biginteger 42)
-      {"#clojure/bigdec" "9223372036854775808"} 9223372036854775808M
-      {"#clojure/ratio" [{"#clojure/biginteger" "2"} {"#clojure/biginteger" "3"}]} 2/3)))
+      {"#clojure.keyword" "foo/bar"} :foo/bar
+      {"#clojure.symbol" "foo/bar"} 'foo/bar
+      {"#clojure.bigint" "9223372036854775808"} 9223372036854775808N
+      {"#clojure.biginteger" "42"} (biginteger 42)
+      {"#clojure.bigdec" "9223372036854775808"} 9223372036854775808M
+      {"#clojure.ratio" [{"#clojure.biginteger" "2"} {"#clojure.biginteger" "3"}]} 2/3)))
 
 (deftest decode-clojure-types
   (let [a (argus)]
     (are [o e] (= o (deargus a e))
-      :foo/bar {"#clojure/keyword" "foo/bar"}
-      'foo/bar {"#clojure/symbol" "foo/bar"}
-      9223372036854775808N {"#clojure/bigint" "9223372036854775808"}
-      (biginteger 42) {"#clojure/biginteger" "42"}
-      9223372036854775808M {"#clojure/bigdec" "9223372036854775808"}
-      2/3 {"#clojure/ratio" [{"#clojure/biginteger" "2"} {"#clojure/biginteger" "3"}]})))
+      :foo/bar {"#clojure.keyword" "foo/bar"}
+      'foo/bar {"#clojure.symbol" "foo/bar"}
+      9223372036854775808N {"#clojure.bigint" "9223372036854775808"}
+      (biginteger 42) {"#clojure.biginteger" "42"}
+      9223372036854775808M {"#clojure.bigdec" "9223372036854775808"}
+      2/3 {"#clojure.ratio" [{"#clojure.biginteger" "2"} {"#clojure.biginteger" "3"}]})))

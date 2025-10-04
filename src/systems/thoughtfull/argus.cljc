@@ -6,8 +6,8 @@
 #?(:clj (set! *warn-on-reflection* true))
 
 (defn- tag?
-  [o]
-  (re-matches #"#([a-zA-Z0-9-_]+/)?[a-zA-Z0-9-_]+" (or (ident o) "")))
+  [k]
+  (= \# (first (or (ident k) ""))))
 
 (defn- tagged-value?
   [o]
@@ -16,6 +16,7 @@
 (declare enargus*)
 
 (defn- enargus-key
+  "If a k is as string beginning with a colon then escape it, otherwise return the string of k."
   [k]
   (if (and (string? k)
         (= ":" (subs k 0 1)))
@@ -23,6 +24,8 @@
     (str k)))
 
 (defn- enargus-map
+  "Encode objects from the inside out.  Map keys are encoded specially so strings and keywords can
+  be distinguished (a keyword starts with a colon, a string starting with a colon is escaped)."
   [cache m]
   (if #?(:clj (instance? clojure.lang.IEditableCollection m) :cljs false)
     (-> (reduce-kv
@@ -51,7 +54,7 @@
   (let [c (type o)]
     (if-let [encoder (find-encoder cache c)]
       (enargus* cache (encoder o))
-      (throw (ex-info "missing encoder" {:class c})))))
+      (throw (ex-info "missing encoder" {:type c})))))
 
 (defn- enargus*
   [cache o]
@@ -130,19 +133,37 @@
     :else
     o))
 
-(defn- valid-tag
+(def tag-re
+  #"#((?:[a-zA-Z0-9-_]+\.)*(?:[a-zA-Z0-9-_]+))\.[a-zA-Z0-9-_]+")
+
+(defn- tag-namespace
   [t]
-  (when (nil? (second (tag? t)))
-    (throw (ex-info "invalid extension tag" {:tag t})))
-  (ident t))
+  (second (re-matches tag-re t)))
+
+(defn- valid-encoder-tag
+  [t]
+  (let [t' (ident t)]
+    (when (nil? (tag-namespace t'))
+      (throw (ex-info "invalid extension tag" {:tag t})))
+    t'))
 
 (defn- ->encoder
   [encoder]
   (if (vector? encoder)
     (let [[t f] encoder
-          t (valid-tag (ident t))]
+          t (valid-encoder-tag (ident t))]
       (fn [o] {t (f o)}))
-    encoder))
+    (fn [o]
+      (let [e (encoder o)]
+        (valid-encoder-tag (key (first e)))
+        e))))
+
+(defn- valid-decoder-tag
+  [t]
+  (let [t' (ident t)]
+    (when (not (tag? t'))
+      (throw (ex-info "invalid extension tag" {:tag t})))
+    t'))
 
 (defn argus
   "Create an instance of argus that uses specified encoders and decoders for tagged values.
@@ -156,5 +177,6 @@
   (let [encoders' (merge default-encoders (zipmap (keys encoders) (map ->encoder (vals encoders))))]
     {:cache (atom encoders')
      :encoders encoders'
-     :decoders (merge default-decoders (zipmap (map valid-tag (keys decoders)) (vals decoders)))
+     :decoders (merge default-decoders
+                 (zipmap (map valid-decoder-tag (keys decoders)) (vals decoders)))
      :default-decoder default-decoder}))

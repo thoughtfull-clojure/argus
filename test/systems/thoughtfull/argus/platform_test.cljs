@@ -35,11 +35,11 @@
 (deftest encode-clojure-types
   (let [a (argus)]
     (are [e o] (= e (enargus a o))
-      {"#clojure/keyword" "foo/bar"} :foo/bar
-      {"#clojure/symbol" "foo/bar"} 'foo/bar)))
+      {"#clojure.keyword" "foo/bar"} :foo/bar
+      {"#clojure.symbol" "foo/bar"} 'foo/bar)))
 
 (deftest decode-clojure-types
   (let [a (argus)]
     (are [o e] (= o (deargus a e))
-      :foo/bar {"#clojure/keyword" "foo/bar"}
-      'foo/bar {"#clojure/symbol" "foo/bar"})))
+      :foo/bar {"#clojure.keyword" "foo/bar"}
+      'foo/bar {"#clojure.symbol" "foo/bar"})))
