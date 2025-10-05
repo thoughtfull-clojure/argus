@@ -42,9 +42,10 @@ library has an object mapper for reading and writing arbitrary tagged JSON data,
 JVM-only library.
 
 In the Clojure/Script world there are two other ways to use tagged values (EDN and Transit), so one
-could reasonably ask why another library/format/etc.?  In particular argus overlaps with Transit.
-Like Transit, argus embraces JSON for its universality.  And like Transit, argus tags data and is
-extensible.
+could reasonably ask why another library/format/etc.?
+
+In particular argus overlaps with Transit.  Like Transit, argus embraces JSON for its universality.
+And like Transit, argus tags data and is extensible.
 
 ### What argus does
 
