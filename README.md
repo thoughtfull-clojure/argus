@@ -50,6 +50,7 @@ extensible.
 
 - En/decode local date, instant, set, and UUID values.
 - Extend en/decoding for arbitrary types.
+- Transparently en/decode keywords, symbols, and strings as map keys.
 - Produce standard JSON values.
 - Produce human readable values.
 
@@ -67,9 +68,22 @@ Argus technically isn't even a JSON library.  It just rewrites Clojure data to C
 
 It works with both Clojure and ClojureScript, so it is suitable for sending rich data to and from backend and frontend.
 
-I do not recommend that you have your JSON library automatically convert map properties into
-keywords.  argus will do that for you and in a way that you can still use strings as keys where it
-makes sense.
+*Because argus transparently handles keywords, symbols, and strings as map keys, I do not recommend
+that you have your JSON library automatically convert map properties into keywords.  That will
+interefere with this decoding process, and there are some cases where it is useful to maintain
+string keys in data (for example, when dealing—not with "objects"—but "mappings" from one name to
+another).*
+
+## Performance
+
+I wouldn't say that performance is not a concern, but my top priorities are:
+
+1. Extensibility
+2. Human readability
+3. Support for both Clojure and ClojureScript
+
+That said, I want argus to be performant, and I have tried to make it performant when I can.  If you
+have performance improvements, I'm happy to take them.
 
 ## Examples
 
