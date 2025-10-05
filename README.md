@@ -64,7 +64,7 @@ extensible.
 
 ### Summary
 
-Argus technically isn't even a JSON library.  It just rewrites Clojure data to Clojure data that is restricted to valid JSON values.
+argus technically isn't even a JSON library.  It just rewrites Clojure data to Clojure data that is restricted to valid JSON values.
 
 It works with both Clojure and ClojureScript, so it is suitable for sending rich data to and from backend and frontend.
 
