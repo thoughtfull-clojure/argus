@@ -183,9 +183,9 @@
 
   *Because argus transparently handles keywords, symbols, and strings as map keys, I do not
   recommend that you have your JSON library automatically convert map properties into keywords.
-  That will interefere with this decoding process, and there are some cases where it is useful to
-  maintain string keys in data (for example, when dealing—not with \"objects\"—but \"mappings\"
-  from one name to another).*
+  This will interfere with the map key decoding process, and there are some cases where it is
+  useful to maintain string keys in data (for example, when dealing—not with \"objects\"—but
+  \"mappings\" from one name to another).*
 
   Example:
 
