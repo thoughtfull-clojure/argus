@@ -31,24 +31,39 @@ A tagged value is a map with a single key/value pair where the key is a tag.  Fo
 
 *For more information see the [Argus "manifesto."](https://argus.fyi/)*
 
-Tagged values are a good idea!  In the Clojur/Script world there are two popular data format with
-tagged values (EDN and Transit), so one could reasonably ask why another library/format/etc.?  In
-particular Argus overlaps with Transit.
+Tagged values are a good idea!  This is not an entirely new idea.  MongoDB has an [Extended
+JSON](https://www.mongodb.com/docs/manual/reference/mongodb-extended-json/#std-label-mongodb-extended-json-v2)
+format.  DynamoDB has [Data Type
+Descriptors](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.NamingRulesDataTypes.html#HowItWorks.DataTypeDescriptors).
+Neither of these user extensible and available as external an library.
+
+The [jsonista](https://github.com/metosin/jsonista/tree/master?tab=readme-ov-file#tagged-json)
+library has an object mapper for reading and writing arbitrary tagged JSON data, but it is a
+JVM-only library.
+
+In the Clojure/Script world there are two other ways to use tagged values (EDN and Transit), so one
+could reasonably ask why another library/format/etc.?  In particular Argus overlaps with Transit.
 
 ### What argus does
 
-- Encode local date, instant, set, and UUID values.
-- Extend encoding for arbitrary types.
+- En/decode local date, instant, set, and UUID values.
+- Extend en/decoding for arbitrary types.
 - Produce standard JSON values.
 - Produce human readable values.
 
-## What argus does not do
+### What argus does NOT do
 
 - Support arbitrary objects as map keys (keys must be keywords, symbols, or strings).
 - Depend on Jackson and all its dependency nonsense
 - Include a JSON reader/writer (you need to bring your own and could use Jackson if you like
   dependency nonsense)
 - Deduplicate or compress any values (you can compress the resulting JSON, if you'd like)
+
+### Summary
+
+Argus technically isn't even a JSON library.  It just rewrites Clojure data to Clojure data that is restricted to valid JSON values.
+
+It works with both Clojure and ClojureScript, so it is suitable for sending rich data to and from backend and frontend.
 
 ## Examples
 
