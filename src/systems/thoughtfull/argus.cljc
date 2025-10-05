@@ -182,10 +182,10 @@
   and the rest of the string is returned unmodified.
 
   *Because argus transparently handles keywords, symbols, and strings as map keys, I do not
-  recommend that you have your JSON library automatically convert map properties into keywords.
-  This will interfere with the map key decoding process, and there are some cases where it is
-  useful to maintain string keys in data (for example, when dealing—not with \"objects\"—but
-  \"mappings\" from one name to another).*
+  recommend that you have your JSON library automatically convert map keys into keywords.  This
+  will interfere with the map key decoding process, and there are some cases where it is useful to
+  maintain string keys in data (for example, when dealing—not with \"objects\"—but \"mappings\"
+  from one name to another).*
 
   Example:
 
