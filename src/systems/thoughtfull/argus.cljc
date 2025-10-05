@@ -181,6 +181,11 @@
   If a key is a string starting with two colons or two quotes, then one colon or quote is removed
   and the rest of the string is returned unmodified.
 
+  _I do not recommend parsing JSON so that map keys are always converted to keywords.  That will
+  interefere with this decoding process, and there are some cases where it is useful to maintain
+  string keys in data (for example, when dealing—not with \"objects\"—but \"mappings\" from one
+  name to another)._
+
   Example:
 
   ```clojure

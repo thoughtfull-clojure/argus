@@ -35,14 +35,16 @@ Tagged values are a good idea!  This is not an entirely new idea.  MongoDB has a
 JSON](https://www.mongodb.com/docs/manual/reference/mongodb-extended-json/#std-label-mongodb-extended-json-v2)
 format.  DynamoDB has [Data Type
 Descriptors](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.NamingRulesDataTypes.html#HowItWorks.DataTypeDescriptors).
-Neither of these user extensible and available as external an library.
+Neither of these are user extensible and available as external an library.
 
 The [jsonista](https://github.com/metosin/jsonista/tree/master?tab=readme-ov-file#tagged-json)
 library has an object mapper for reading and writing arbitrary tagged JSON data, but it is a
 JVM-only library.
 
 In the Clojure/Script world there are two other ways to use tagged values (EDN and Transit), so one
-could reasonably ask why another library/format/etc.?  In particular Argus overlaps with Transit.
+could reasonably ask why another library/format/etc.?  In particular argus overlaps with Transit.
+Like Transit, argus embraces JSON for its universality.  And like Transit, argus tags data and is
+extensible.
 
 ### What argus does
 
@@ -64,6 +66,10 @@ could reasonably ask why another library/format/etc.?  In particular Argus overl
 Argus technically isn't even a JSON library.  It just rewrites Clojure data to Clojure data that is restricted to valid JSON values.
 
 It works with both Clojure and ClojureScript, so it is suitable for sending rich data to and from backend and frontend.
+
+I do not recommend that you have your JSON library automatically convert map properties into
+keywords.  argus will do that for you and in a way that you can still use strings as keys where it
+makes sense.
 
 ## Examples
 
