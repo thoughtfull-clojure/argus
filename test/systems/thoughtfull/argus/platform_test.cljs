@@ -43,3 +43,7 @@
     (are [o e] (= o (deargus a e))
       :foo/bar {"#clojure.keyword" "foo/bar"}
       'foo/bar {"#clojure.symbol" "foo/bar"})))
+
+(deftest custom-encoder-for-builtin-tag
+  (is (thrown? js/Error #"invalid extension tag"
+        (enargus (argus :encoders {cljs.core/PersistentHashSet ["set" str]}) #{1}))))

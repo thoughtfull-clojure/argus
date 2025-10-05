@@ -288,13 +288,13 @@
                                :default-decoder (fn [t v] :unknown-value))
   ```
 
-  - **`encoders`** (optional) — a map from type to encoder
-  - **`decoders`** (optional) — a map from extension tag to decoder
+  - **`encoders`** (optional) — a map from type to encoder.
+  - **`decoders`** (optional) — a map from extension tag to decoder.
   - **`default-decoder`** (optional) — a two-argument function, defaults to `default-decoder`."
   [& {:keys [encoders decoders default-decoder]}]
   (let [encoders' (merge default-encoders (zipmap (keys encoders) (map ->encoder (vals encoders))))]
     {:cache (atom encoders')
      :encoders encoders'
-     :decoders (merge default-decoders
-                 (zipmap (map valid-decoder-tag (keys decoders)) (vals decoders)))
+     :decoders (merge (zipmap (map valid-decoder-tag (keys decoders)) (vals decoders))
+                 default-decoders)
      :default-decoder default-decoder}))

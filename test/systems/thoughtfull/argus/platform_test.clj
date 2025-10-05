@@ -1,6 +1,6 @@
 (ns systems.thoughtfull.argus.platform-test
   (:require
-    [clojure.test :refer [are deftest]]
+    [clojure.test :refer [are deftest is]]
     [systems.thoughtfull.argus :refer [argus deargus enargus]]))
 
 (deftest encode-default-types
@@ -46,3 +46,7 @@
       (biginteger 42) {"#clojure.biginteger" "42"}
       9223372036854775808M {"#clojure.bigdec" "9223372036854775808"}
       2/3 {"#clojure.ratio" [{"#clojure.biginteger" "2"} {"#clojure.biginteger" "3"}]})))
+
+(deftest custom-encoder-for-builtin-tag
+  (is (thrown? Exception #"invalid extension tag"
+        (enargus (argus :encoders {clojure.lang.IPersistentSet ["set" str]}) #{1}))))

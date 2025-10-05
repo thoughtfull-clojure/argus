@@ -145,3 +145,12 @@
           :value {:foo #uuid "06ccea6d-0d8a-4f1f-a026-c30a3e12a481"}}
         (deargus (argus :default-decoder (fn [t v] {:tag t :value v}))
           {"#unknown" {":foo" {"#uuid" "06ccea6d-0d8a-4f1f-a026-c30a3e12a481"}}}))))
+
+(deftest decode-invalid-unqualified-tag
+  ;; defining a new unqualified tag is not allowed, but sometimes people break then rules and we
+  ;; should still be able to read their data even as we hold ourselves to a higher standard :)
+  (is (= #{1} (deargus (argus :decoders {"#foo" set}) {"#foo" [1]}))))
+
+(deftest custom-decoder-for-builtin-tag
+  ;; overriding the decoder for a builtin tag is not allowed
+  (is (= #{1} (deargus (argus :decoders {"#set" vec}) {"#set" [1]}))))
