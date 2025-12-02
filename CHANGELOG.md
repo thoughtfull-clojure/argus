@@ -17,6 +17,17 @@ project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.ht
 
 ### Fixed
 
+## [0.4.0] - 2025-12-01
+
+### Changed
+
+- Make tag?, tagged-value?, enargus-key, deargus-key public since they are useful when working with
+  data.
+- Allow defining a new encoder to a built-in tag.  This allows normalizing types.  Redefining the
+  decoder for a built-in tag is still disallowed.
+- Allow recursive encoding.  An encoder can encode from non-base type to non-base type to reuse an
+  existing encoding function.
+
 ## [0.3.2] - 2025-10-05
 
 ### Changed
