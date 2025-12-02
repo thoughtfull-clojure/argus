@@ -55,7 +55,8 @@
 
 (deftest encode-with-builtin-tag
   (doseq [t ["#set" "#date" "#instant" "#uuid"]]
-    (let [a (argus :encoders {CustomType [t custom-encoder]} :decoders {t ->CustomType})
+    (let [a (argus :encoders {CustomType [t custom-encoder]}
+              :decoders {t (partial apply ->CustomType)})
           x (map->CustomType {})
           y (enargus a x)]
       (is (= {t [nil nil]} y)))))
