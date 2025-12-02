@@ -19,9 +19,17 @@
 
 (declare enargus*)
 
-(defn- enargus-key
-  "If a k is as string beginning with a colon or quote then escape it, otherwise return a string
-  representation of k."
+(defn enargus-key
+  "Encode a map key into a JSON string.
+
+  If a key is a keyword, then it is encoded as a string starting with a colon.  Keyword namespaces
+  are preserved.
+
+  If a key is a symbol, then it is encoded as a string starting with a quote.  Symbol namespaces
+  are preserved.
+
+  If a key is a string starting with a colon or quote, then the colon or quote is escaped by
+  doubling it."
   [k]
   (if (and (string? k) (pos? (count k)))
     (let [f (subs k 0 1)]
@@ -116,19 +124,29 @@
   (when (tagged-value? o)
     (first o)))
 
-(defn- deargus-key
+(defn deargus-key
+  "Decode a string into an appropriate map key.
+
+  If a key is a string starting with a colon, then it is decoded as a keyword.  Keyword namespaces
+  are preserved.
+
+  If a key is a string starting with a quote, then it is decoded as a symbol.  Symbol namespaces
+  are preserved.
+
+  If a key is a string starting with two colons or two quotes, then one colon or quote is removed
+  and the rest of the string is returned unmodified."
   [k]
   (if (and (string? k) (> (count k) 1))
-   (cond
-     (or (= "::" (subs k 0 2)) (= "''" (subs k 0 2)))
-     (subs k 1)
-     (= ":" (subs k 0 1))
-     (keyword (subs k 1))
-     (= "'" (subs k 0 1))
-     (symbol (subs k 1))
-     :else
-     k)
-   k))
+    (cond
+      (or (= "::" (subs k 0 2)) (= "''" (subs k 0 2)))
+      (subs k 1)
+      (= ":" (subs k 0 1))
+      (keyword (subs k 1))
+      (= "'" (subs k 0 1))
+      (symbol (subs k 1))
+      :else
+      k)
+    k))
 
 (defn default-decoder
   "Takes a tag and value and returns a tagged value.
