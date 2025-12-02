@@ -100,8 +100,8 @@
    \"''not-symbol\" {\"#set\" [4]}}
   ```
 
-  -**`argus`** — an argus specification produced by [[argus]].
-  -**`value`** — a JSON-compatible tagged value to encode."
+  - **`argus`** — an argus specification produced by [[argus]].
+  - **`value`** — a JSON-compatible tagged value to encode."
   [argus value]
   (enargus* (:cache argus) value))
 
@@ -197,8 +197,8 @@
   {:key/word #{1}, sym/bol #{2}, \":not-keyword\" #{3}, \"'not-symbol\" #{4}}
   ```
 
-  -**`argus`** — an argus specification produced by [[argus]].
-  -**`value`** — a JSON-compatible tagged value to decode."
+  - **`argus`** — an argus specification produced by [[argus]].
+  - **`value`** — a JSON-compatible tagged value to decode."
   [argus value]
   (cond
     (map? value)
