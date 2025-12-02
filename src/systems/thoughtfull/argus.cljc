@@ -5,11 +5,15 @@
 
 #?(:clj (set! *warn-on-reflection* true))
 
-(defn- tag?
+(defn tag?
+  "True if k is an identifier (string, symbol, or keyword) starting with '#'."
   [k]
   (= \# (first (or (ident k) ""))))
 
-(defn- tagged-value?
+(defn tagged-value?
+  "True if o is a map with a single key/value pair where the key is a tag.
+
+  See [[tag?]]"
   [o]
   (and (map? o) (= 1 (count o)) (tag? (key (first o)))))
 
