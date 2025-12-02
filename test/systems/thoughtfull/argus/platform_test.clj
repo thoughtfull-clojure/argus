@@ -1,7 +1,9 @@
 (ns systems.thoughtfull.argus.platform-test
   (:require
     [clojure.test :refer [are deftest is]]
-    [systems.thoughtfull.argus :refer [argus deargus enargus]]))
+    [systems.thoughtfull.argus :refer [argus deargus enargus]])
+  (:import
+    (java.time LocalDate)))
 
 (deftest encode-default-types
   (let [a (argus)]
@@ -47,6 +49,9 @@
       9223372036854775808M {"#clojure.bigdec" "9223372036854775808"}
       2/3 {"#clojure.ratio" [{"#clojure.biginteger" "2"} {"#clojure.biginteger" "3"}]})))
 
-(deftest custom-encoder-for-builtin-tag
-  (is (thrown? Exception #"invalid extension tag"
-        (enargus (argus :encoders {clojure.lang.IPersistentSet ["set" str]}) #{1}))))
+(defrecord CustomType [a b])
+
+(deftest encode-to-builtin-type
+  (is (= {"#date" "2025-12-01"}
+        (enargus (argus :encoders {CustomType (fn [_] (LocalDate/of 2025 12 1))})
+          (map->CustomType {})))))

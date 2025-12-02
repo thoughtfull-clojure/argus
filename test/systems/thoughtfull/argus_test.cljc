@@ -10,15 +10,6 @@
 
 ;; the following are explicit and verbose because thrown-with-msg? is doing something funny with a
 ;; class literal during macro expansion on the JVM
-(deftest encoder-tag-invalid-missing-octothorpe
-  (when-let [data (let [a (argus :encoders {CustomType (fn [o] {"foo.bar" (custom-encoder o)})})]
-                    (-> (is (thrown-with-msg? #?(:clj Exception :cljs js/Error)
-                              #"invalid extension tag"
-                              (enargus a (->CustomType 1 2)))
-                          "should start with octothorpe")
-                      ex-data))]
-    (is (= "foo.bar" (:tag data)) "should start with octothorpe")))
-
 (deftest encoder-tag-invalid-unqualified
   (when-let [data (let [a (argus :encoders {CustomType (fn [o] {"#bar" (custom-encoder o)})})]
                     (-> (is (thrown-with-msg? #?(:clj Exception :cljs js/Error)

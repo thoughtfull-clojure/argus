@@ -44,6 +44,9 @@
       :foo/bar {"#clojure.keyword" "foo/bar"}
       'foo/bar {"#clojure.symbol" "foo/bar"})))
 
-(deftest custom-encoder-for-builtin-tag
-  (is (thrown? js/Error #"invalid extension tag"
-        (enargus (argus :encoders {cljs.core/PersistentHashSet ["set" str]}) #{1}))))
+(defrecord CustomType [a b])
+
+(deftest encode-to-builtin-type
+  (is (= {"#date" "2025-07-09"}
+        (enargus (argus :encoders {CustomType (fn [_] (Date/fromIsoString "2025-07-09"))})
+          (map->CustomType {})))))

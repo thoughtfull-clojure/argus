@@ -252,7 +252,7 @@
       (fn [o] {t (f o)}))
     (fn [o]
       (let [e (encoder o)]
-        (valid-encoder-tag (key (first e)))
+        (when (tagged-value? e) (valid-encoder-tag (key (first e))))
         e))))
 
 (defn- valid-decoder-tag
