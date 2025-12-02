@@ -240,7 +240,7 @@
 (defn- valid-encoder-tag
   [t]
   (let [t' (ident t)]
-    (when (nil? (tag-namespace t'))
+    (when (and (nil? (tag-namespace t')) (not (contains? default-decoders t')))
       (throw (ex-info "invalid extension tag" {:tag t})))
     t'))
 

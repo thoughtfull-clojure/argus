@@ -62,6 +62,13 @@
   (is (= {"#uuid" "62047d3a-112c-4458-900f-606f7fb66a20"}
         (enargus (argus) #uuid "62047d3a-112c-4458-900f-606f7fb66a20"))))
 
+(deftest encode-with-builtin-tag
+  (doseq [t ["#set" "#date" "#instant" "#uuid"]]
+    (let [a (argus :encoders {CustomType [t custom-encoder]} :decoders {t ->CustomType})
+          x (map->CustomType {})
+          y (enargus a x)]
+      (is (= {t [nil nil]} y)))))
+
 (deftest decode-tagged-value
   (is (= #uuid "62047d3a-112c-4458-900f-606f7fb66a20"
         (deargus (argus) {"#uuid" "62047d3a-112c-4458-900f-606f7fb66a20"}))))
