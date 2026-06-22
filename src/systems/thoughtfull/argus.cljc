@@ -113,7 +113,7 @@
   ```
 
   - **`argus`** — an argus specification produced by [[argus]].
-  - **`value`** — a JSON-compatible tagged value to encode."
+  - **`value`** — a Clojure value to encode."
   [argus value]
   (enargus* (:cache argus) value))
 
