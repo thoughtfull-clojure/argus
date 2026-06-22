@@ -70,21 +70,23 @@
 
 (defn- enargus*
   [cache o]
-  (let [c (type o)
-        encoder (find-encoder cache c)]
-    (cond
-      encoder
-      (enargus* cache (encoder o))
-      (or (nil? o) (boolean? o) (int? o) (double? o) (string? o))
-      o
-      (and (map? o) (not (record? o)))
-      (if (some #(not (or (keyword? %) (symbol? %) (string? %))) (keys o))
-        {"#clojure.map" (mapv (partial enargus* cache) (apply concat o))}
-        (enargus-map cache o))
-      (vector? o)
-      (enargus-vector cache o)
-      :else
-      (throw (ex-info "missing encoder" {:type c})))))
+  (if (nil? o)
+    o
+    (let [c (type o)
+          encoder (find-encoder cache c)]
+      (cond
+        encoder
+        (enargus* cache (encoder o))
+        (or (boolean? o) (int? o) (double? o) (string? o))
+        o
+        (and (map? o) (not (record? o)))
+        (if (some #(not (or (keyword? %) (symbol? %) (string? %))) (keys o))
+          {"#clojure.map" (mapv (partial enargus* cache) (apply concat o))}
+          (enargus-map cache o))
+        (vector? o)
+        (enargus-vector cache o)
+        :else
+        (throw (ex-info "missing encoder" {:type c}))))))
 
 (defn enargus
   "Encode arbitrary Clojure values into JSON-compatible tagged values.
