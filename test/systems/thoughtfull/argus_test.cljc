@@ -174,10 +174,19 @@
   (let [a (argus)]
     (are [e o] (= e (enargus a o))
       {"#clojure.keyword" "foo/bar"} :foo/bar
-      {"#clojure.symbol" "foo/bar"} 'foo/bar)))
+      {"#clojure.symbol" "foo/bar"} 'foo/bar
+      {"#clojure.list" ["foo" "bar"]} (list "foo" "bar"))))
 
 (deftest decode-clojure-types
   (let [a (argus)]
     (are [o e] (= o (deargus a e))
       :foo/bar {"#clojure.keyword" "foo/bar"}
-      'foo/bar {"#clojure.symbol" "foo/bar"})))
+      'foo/bar {"#clojure.symbol" "foo/bar"}
+      (list "foo" "bar") {"#clojure.list" ["foo" "bar"]})
+    (is (list? (deargus a {"#clojure.list" ["foo" "bar"]})))))
+
+(deftest encode-non-simple-keys
+  (is (= {"#clojure.map" [["foo" "bar"] "baz"]} (enargus (argus) {["foo" "bar"] "baz"}))))
+
+(deftest decode-non-simple-keys
+  (is (= {["foo" "bar"] "baz"} (deargus (argus) {"#clojure.map" [["foo" "bar"] "baz"]}))))

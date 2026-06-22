@@ -17,6 +17,7 @@
    Date (fn [^Date o] {"#date" (.toIsoString o true)})
    js/Date (fn [o] {"#instant" (.toISOString o)})
    cljs.core/Keyword (fn [o] {"#clojure.keyword" (ident o)})
+   cljs.core/List (fn [o] {"#clojure.list" (vec o)})
    cljs.core/Symbol (fn [o] {"#clojure.symbol" (ident o)})})
 
 (def default-decoders
@@ -25,4 +26,6 @@
    "#instant" #(js/Date. %)
    "#uuid" parse-uuid
    "#clojure.keyword" keyword
+   "#clojure.list" (partial apply list)
+   "#clojure.map" (partial apply hash-map)
    "#clojure.symbol" symbol})

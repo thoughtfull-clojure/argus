@@ -47,21 +47,26 @@
    java.sql.Date (fn [o] (java.sql.Date/.toLocalDate o))
    java.sql.Timestamp (fn [o] (java.sql.Timestamp/.toInstant o))
    java.util.UUID (fn [o] {"#uuid" (str o)})
-   clojure.lang.Keyword (fn [o] {"#clojure.keyword" (ident o)})
-   clojure.lang.Symbol (fn [o] {"#clojure.symbol" (ident o)})
+   Ratio (fn [^Ratio o] {"#clojure.ratio" [(.numerator o) (.denominator o)]})
    clojure.lang.BigInt (fn [o] {"#clojure.bigint" (str o)})
-   java.math.BigInteger (fn [o] {"#clojure.biginteger" (str o)})
+   clojure.lang.Keyword (fn [o] {"#clojure.keyword" (ident o)})
+   clojure.lang.PersistentList (fn [o] {"#clojure.list" (vec o)})
+   clojure.lang.PersistentQueue (fn [o] {"#clojure.queue" (vec o)})
+   clojure.lang.Symbol (fn [o] {"#clojure.symbol" (ident o)})
    java.math.BigDecimal (fn [o] {"#clojure.bigdec" (str o)})
-   Ratio (fn [^Ratio o] {"#clojure.ratio" [(.numerator o) (.denominator o)]})})
+   java.math.BigInteger (fn [o] {"#clojure.biginteger" (str o)})})
 
 (def default-decoders
   {"#set" set
    "#date" java.time.LocalDate/parse
    "#instant" java.time.Instant/parse
    "#uuid" parse-uuid
-   "#clojure.keyword" keyword
-   "#clojure.symbol" symbol
+   "#clojure.bigdec" bigdec
    "#clojure.bigint" bigint
    "#clojure.biginteger" biginteger
-   "#clojure.bigdec" bigdec
-   "#clojure.ratio" (fn [[num denom]] (Ratio. num denom))})
+   "#clojure.keyword" keyword
+   "#clojure.list" (partial apply list)
+   "#clojure.map" (partial apply hash-map)
+   "#clojure.queue" (partial into clojure.lang.PersistentQueue/EMPTY)
+   "#clojure.ratio" (fn [[num denom]] (Ratio. num denom))
+   "#clojure.symbol" symbol})
