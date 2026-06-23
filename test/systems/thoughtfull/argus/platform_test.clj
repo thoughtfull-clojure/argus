@@ -27,6 +27,7 @@
       {"#clojure.bigint" "9223372036854775808"} 9223372036854775808N
       {"#clojure.biginteger" "42"} (biginteger 42)
       {"#clojure.bigdec" "9223372036854775808"} 9223372036854775808M
+      {"#clojure.queue" [1 2]} (into clojure.lang.PersistentQueue/EMPTY [1 2])
       {"#clojure.ratio" [{"#clojure.biginteger" "2"} {"#clojure.biginteger" "3"}]} 2/3)))
 
 (deftest decode-clojure-types
@@ -35,6 +36,7 @@
       9223372036854775808N {"#clojure.bigint" "9223372036854775808"}
       (biginteger 42) {"#clojure.biginteger" "42"}
       9223372036854775808M {"#clojure.bigdec" "9223372036854775808"}
+      (into clojure.lang.PersistentQueue/EMPTY [1 2]) {"#clojure.queue" [1 2]}
       2/3 {"#clojure.ratio" [{"#clojure.biginteger" "2"} {"#clojure.biginteger" "3"}]})))
 
 (defrecord CustomType [a b])

@@ -24,6 +24,16 @@
   (is (.equals (Date/fromIsoString "2025-07-09")
         (deargus (argus) {"#date" "2025-07-09"}))))
 
+(deftest encode-clojure-types
+  (let [a (argus)]
+    (are [e o] (= e (enargus a o))
+      {"#clojure.queue" [1 2]} (into cljs.core/PersistentQueue.EMPTY [1 2]))))
+
+(deftest decode-clojure-types
+  (let [a (argus)]
+    (are [o e] (= o (deargus a e))
+      (into cljs.core/PersistentQueue.EMPTY [1 2]) {"#clojure.queue" [1 2]})))
+
 (defrecord CustomType [a b])
 
 (deftest encode-to-builtin-type

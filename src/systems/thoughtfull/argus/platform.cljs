@@ -18,6 +18,7 @@
    js/Date (fn [o] {"#instant" (.toISOString o)})
    cljs.core/Keyword (fn [o] {"#clojure.keyword" (ident o)})
    cljs.core/List (fn [o] {"#clojure.list" (vec o)})
+   cljs.core/PersistentQueue (fn [o] {"#clojure.queue" (vec o)})
    cljs.core/Symbol (fn [o] {"#clojure.symbol" (ident o)})})
 
 (def default-decoders
@@ -28,4 +29,5 @@
    "#clojure.keyword" keyword
    "#clojure.list" (partial apply list)
    "#clojure.map" (partial apply hash-map)
+   "#clojure.queue" (partial into cljs.core/PersistentQueue.EMPTY)
    "#clojure.symbol" symbol})
