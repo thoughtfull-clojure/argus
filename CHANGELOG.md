@@ -17,6 +17,19 @@ project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.ht
 
 ### Fixed
 
+## [0.5.0] - 2026-06-23
+
+### Added
+
+- Support maps with complex (non-string, non-symbol, non-keyword) keys
+- Encode seqs as vectors
+- Round-trip encoding for list and PersistentQueue
+
+### Changed
+
+- Allow overriding a built-in decoder
+- Lots of performance improvements
+
 ## [0.4.0] - 2025-12-01
 
 ### Changed
@@ -67,7 +80,8 @@ project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.ht
 
 - Initial release.
 
-[unreleased]: https://github.com/thoughtfull-clojure/argus/compare/v0.4.0...main
+[unreleased]: https://github.com/thoughtfull-clojure/argus/compare/v0.5.0...main
+[0.5.0]: https://github.com/thoughtfull-clojure/argus/releases/tag/v0.4.0..v0.5.0
 [0.4.0]: https://github.com/thoughtfull-clojure/argus/releases/tag/v0.3.2..v0.4.0
 [0.3.2]: https://github.com/thoughtfull-clojure/argus/releases/tag/v0.3.1..v0.3.2
 [0.3.1]: https://github.com/thoughtfull-clojure/argus/releases/tag/v0.3.0..v0.3.1
