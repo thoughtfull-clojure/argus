@@ -18,17 +18,20 @@
 
 (defn- find-interface-encoder
   ([cache c]
-   (find-interface-encoder cache c c nil (seq (Class/.getInterfaces c))))
-  ([cache c b encoder [i & ii]]
-   (if (and b (not= Object b))
-     (if i
-       (if-let [encoder' (get cache i)]
-         (do (when encoder (throw (ex-info "multiple encoders" {:class c})))
-           (recur cache c b encoder' ii))
-         (recur cache c b encoder ii))
-       (let [b (Class/.getSuperclass b)]
-         (find-interface-encoder cache c b encoder (Class/.getInterfaces b))))
-     encoder)))
+   (find-interface-encoder cache c c nil (Class/.getInterfaces c)))
+  ([cache c b encoder ^objects ii]
+   (let [len (alength ii)]
+     (loop [encoder encoder
+            j 0]
+       (if (and b (not= Object b))
+         (if (< j len)
+           (if-let [encoder' (get cache (aget ii j))]
+             (do (when encoder (throw (ex-info "multiple encoders" {:class c})))
+               (recur encoder' (inc j)))
+             (recur  encoder (inc j)))
+           (let [b (Class/.getSuperclass b)]
+             (find-interface-encoder cache c b encoder (Class/.getInterfaces b))))
+         encoder)))))
 
 (defn find-encoder
   [cache c]
