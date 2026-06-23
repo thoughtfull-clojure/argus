@@ -6,11 +6,15 @@
     (java.time ZoneOffset)
     (java.time.format DateTimeFormatter)))
 
+(set! *warn-on-reflection* true)
+
 (defn- find-base-encoder
   [cache c]
-  (when (and c (not= Object c))
-    (or (get @cache c)
-      (find-base-encoder cache (Class/.getSuperclass c)))))
+  (if (and c (not= Object c))
+    (if (contains? cache c)
+      (get cache c)
+      (find-base-encoder cache (Class/.getSuperclass c)))
+    ::missing))
 
 (defn- find-interface-encoder
   ([cache c]
@@ -18,7 +22,7 @@
   ([cache c b encoder [i & ii]]
    (if (and b (not= Object b))
      (if i
-       (if-let [encoder' (get @cache i)]
+       (if-let [encoder' (get cache i)]
          (do (when encoder (throw (ex-info "multiple encoders" {:class c})))
            (recur cache c b encoder' ii))
          (recur cache c b encoder ii))
@@ -28,19 +32,27 @@
 
 (defn find-encoder
   [cache c]
-  (when-let [encoder (or (find-base-encoder cache c) (find-interface-encoder cache c))]
-    (swap! cache assoc c encoder)
-    encoder))
+  (let [cache' @cache
+        encoder (find-base-encoder cache' c)]
+    (if (= encoder ::missing)
+      (let [encoder (find-interface-encoder cache' c)]
+        (when (not (contains? @cache c))
+          (swap! cache #(if (contains? % c) % (assoc % c encoder))))
+        encoder)
+      encoder)))
 
-(def instant-formatter
+(def ^DateTimeFormatter instant-formatter
   (DateTimeFormatter/ofPattern "yyyy-MM-dd'T'HH:mm:ss.SSSX"))
 
 (defn- encode-instant
-  [i]
+  [^java.time.Instant i]
   (.format instant-formatter (.atOffset i (ZoneOffset/of "Z"))))
 
 (def default-encoders
   {clojure.lang.IPersistentSet (fn [o] {"#set" (vec o)})
+   ;; for map and vector, go immediately to implicit encoding
+   clojure.lang.IPersistentMap nil
+   clojure.lang.PersistentVector nil
    java.time.LocalDate (fn [o] {"#date" (str o)})
    java.time.Instant (fn [o] {"#instant" (encode-instant o)})
    java.util.Date (fn [o] (java.util.Date/.toInstant o))

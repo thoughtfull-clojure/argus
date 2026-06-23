@@ -15,7 +15,10 @@
 
   See [[tag?]]"
   [o]
-  (and (map? o) (= 1 (count o)) (tag? (key (first o)))))
+  (and (map? o) (= 1 (count o))
+    (tag?
+      ;; get the first key without creating a seq
+      (reduce-kv (fn [_m k _v] (reduced k)) nil o))))
 
 (declare enargus*)
 
@@ -70,15 +73,13 @@
 
 (defn- enargus*
   [cache o]
-  (if (nil? o)
+  (if (or (nil? o) (boolean? o) (int? o) (double? o) (string? o))
     o
     (let [c (type o)
           encoder (find-encoder cache c)]
       (cond
         encoder
         (enargus* cache (encoder o))
-        (or (boolean? o) (int? o) (double? o) (string? o))
-        o
         (and (map? o) (not (record? o)))
         (if (some #(not (or (keyword? %) (symbol? %) (string? %))) (keys o))
           {"#clojure.map" (mapv (partial enargus* cache) (apply concat o))}
@@ -165,7 +166,7 @@
   [argus m]
   (if-let [[t v] (tagged-value m)]
     (let [v' (deargus argus v)]
-      (if-some [decoder (get-in argus [:decoders t])]
+      (if-some [decoder (-> argus :decoders (get t))]
         (decoder v')
         (let [decoder (or (:default-decoder argus)
                         default-decoder)]
