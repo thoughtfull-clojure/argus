@@ -47,6 +47,7 @@
   (let [a (argus)]
     (are [e o] (= e (enargus a o))
       [1 2] (map inc (range 2))
+      [1 2] (list* 1 2 nil)
       {"#clojure.map" [[1 2] "bar"]} {[1 2] "bar"}
       {"#clojure.keyword" "foo/bar"} :foo/bar
       {"#clojure.symbol" "foo/bar"} 'foo/bar
