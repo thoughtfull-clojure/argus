@@ -44,6 +44,18 @@
       (str "'" k)
       (str k))))
 
+(defn- enargus-complex-key-map
+  "Encode objects from the inside out.  Map keys are encoded specially so strings, symbols, and
+  keywords can be distinguished (a keyword starts with a colon, a symbol starts with a quote, a
+  string starting with a colon or quote is escaped)."
+  [cache m]
+  {"#clojure.map"
+   (reduce-kv
+     (fn [m k v]
+       (conj m (enargus* cache k) (enargus* cache v)))
+     (transient [])
+     m)})
+
 (defn- enargus-map
   "Encode objects from the inside out.  Map keys are encoded specially so strings, symbols, and
   keywords can be distinguished (a keyword starts with a colon, a symbol starts with a quote, a
@@ -51,9 +63,11 @@
   [cache m]
   (-> (reduce-kv
         (fn [m k v]
-          (let [k' (enargus-key k)]
-            (cond-> (assoc! m k' (enargus* cache v))
-              (not= k k') (dissoc! k))))
+          (if (not (or (keyword? k) (symbol? k) (string? k)))
+            (reduced (enargus-complex-key-map cache m))
+            (let [k' (enargus-key k)]
+              (cond-> (assoc! m k' (enargus* cache v))
+                (not= k k') (dissoc! k)))))
         (transient m)
         m)
     persistent!
