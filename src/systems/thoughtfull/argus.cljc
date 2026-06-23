@@ -49,27 +49,22 @@
   keywords can be distinguished (a keyword starts with a colon, a symbol starts with a quote, a
   string starting with a colon or quote is escaped)."
   [cache m]
-  (if #?(:clj (instance? clojure.lang.IEditableCollection m) :cljs false)
-    (-> (reduce-kv
-          (fn [m k v]
-            (let [k' (enargus-key k)]
-              (cond-> (assoc! m k' (enargus* cache v))
-                (not= k k') (dissoc! k))))
-          (transient m)
-          m)
-      persistent!
-      (with-meta (meta m)))
-    (reduce-kv
-      (fn [m k v]
-        (let [k' (enargus-key k)]
-          (cond-> (assoc m k' (enargus* cache v))
-            (not= k k') (dissoc k))))
-      m
-      m)))
+  (-> (reduce-kv
+        (fn [m k v]
+          (let [k' (enargus-key k)]
+            (cond-> (assoc! m k' (enargus* cache v))
+              (not= k k') (dissoc! k))))
+        (transient m)
+        m)
+    persistent!
+    (with-meta (meta m))))
 
-(defn- enargus-vector
+(defn- enargus-sequential
   [cache v]
-  (into (empty v) (map (partial enargus* cache)) v))
+  (->
+    (transduce (map (partial enargus* cache)) conj! (transient []) v)
+    persistent!
+    (with-meta (meta v))))
 
 (defn- enargus*
   [cache o]
@@ -84,8 +79,8 @@
         (if (some #(not (or (keyword? %) (symbol? %) (string? %))) (keys o))
           {"#clojure.map" (mapv (partial enargus* cache) (apply concat o))}
           (enargus-map cache o))
-        (vector? o)
-        (enargus-vector cache o)
+        (sequential? o)
+        (enargus-sequential cache o)
         :else
         (throw (ex-info "missing encoder" {:type c}))))))
 
@@ -325,6 +320,6 @@
   (let [encoders' (merge default-encoders (zipmap (keys encoders) (map ->encoder (vals encoders))))]
     {:cache (atom encoders')
      :encoders encoders'
-     :decoders (merge (zipmap (map valid-decoder-tag (keys decoders)) (vals decoders))
-                 default-decoders)
+     :decoders (merge default-decoders
+                 (zipmap (map valid-decoder-tag (keys decoders)) (vals decoders)))
      :default-decoder default-decoder}))
