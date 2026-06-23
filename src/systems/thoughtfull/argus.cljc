@@ -49,12 +49,14 @@
   keywords can be distinguished (a keyword starts with a colon, a symbol starts with a quote, a
   string starting with a colon or quote is escaped)."
   [cache m]
-  {"#clojure.map"
-   (reduce-kv
-     (fn [m k v]
-       (conj m (enargus* cache k) (enargus* cache v)))
-     (transient [])
-     m)})
+  (transient
+    {"#clojure.map"
+     (persistent!
+       (reduce-kv
+         (fn [m k v]
+           (conj! m [(enargus* cache k) (enargus* cache v)]))
+         (transient [])
+         m))}))
 
 (defn- enargus-map
   "Encode objects from the inside out.  Map keys are encoded specially so strings, symbols, and
@@ -62,13 +64,13 @@
   string starting with a colon or quote is escaped)."
   [cache m]
   (-> (reduce-kv
-        (fn [m k v]
+        (fn [m' k v]
           (if (not (or (keyword? k) (symbol? k) (string? k)))
             (reduced (enargus-complex-key-map cache m))
             (let [k' (enargus-key k)]
-              (cond-> (assoc! m k' (enargus* cache v))
+              (cond-> (assoc! m' k' (enargus* cache v))
                 (not= k k') (dissoc! k)))))
-        (transient {})
+        (transient (hash-map))
         m)
     persistent!
     (with-meta (meta m))))
@@ -76,8 +78,7 @@
 (defn- enargus-sequential
   [cache v]
   (->
-    (transduce (map (partial enargus* cache)) conj! (transient []) v)
-    persistent!
+    (into [] (map (partial enargus* cache)) v)
     (with-meta (meta v))))
 
 (defn- enargus*
@@ -90,9 +91,7 @@
         encoder
         (enargus* cache (encoder o))
         (and (map? o) (not (record? o)))
-        (if (some #(not (or (keyword? %) (symbol? %) (string? %))) (keys o))
-          {"#clojure.map" (mapv (partial enargus* cache) (apply concat o))}
-          (enargus-map cache o))
+        (enargus-map cache o)
         (sequential? o)
         (enargus-sequential cache o)
         :else

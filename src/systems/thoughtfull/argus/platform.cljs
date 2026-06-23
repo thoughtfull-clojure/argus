@@ -28,6 +28,6 @@
    "#uuid" parse-uuid
    "#clojure.keyword" keyword
    "#clojure.list" (partial apply list)
-   "#clojure.map" (partial apply hash-map)
+   "#clojure.map" (partial into {})
    "#clojure.queue" (partial into cljs.core/PersistentQueue.EMPTY)
    "#clojure.symbol" symbol})

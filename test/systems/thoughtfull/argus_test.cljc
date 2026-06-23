@@ -38,7 +38,7 @@
       [1 2] (list* 1 2 nil)
       {"#set" [1 2]} (sorted-set 2 1)
       {"a" 1 "b" 2} (sorted-map "b" 2 "a" 1)
-      {"#clojure.map" [[1 2] "bar"]} {[1 2] "bar"}
+      {"#clojure.map" [[[1 2] "bar"] [{"#clojure.keyword" "foo"} 42]]} {[1 2] "bar" :foo 42}
       {"#clojure.keyword" "foo/bar"} :foo/bar
       {"#clojure.symbol" "foo/bar"} 'foo/bar
       {"#clojure.list" ["foo" "bar"]} (list "foo" "bar"))))
@@ -46,7 +46,7 @@
 (deftest decode-clojure-types
   (let [a (argus)]
     (are [o e] (= o (deargus a e))
-      {[1 2] "bar"} {"#clojure.map" [[1 2] "bar"]}
+      {[1 2] "bar" :foo 42} {"#clojure.map" [[[1 2] "bar"] [{"#clojure.keyword" "foo"} 42]]}
       :foo/bar {"#clojure.keyword" "foo/bar"}
       'foo/bar {"#clojure.symbol" "foo/bar"}
       (list "foo" "bar") {"#clojure.list" ["foo" "bar"]})

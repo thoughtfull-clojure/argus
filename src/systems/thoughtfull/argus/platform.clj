@@ -81,7 +81,7 @@
    "#clojure.biginteger" biginteger
    "#clojure.keyword" keyword
    "#clojure.list" (partial apply list)
-   "#clojure.map" (partial apply hash-map)
+   "#clojure.map" (partial into {})
    "#clojure.queue" (partial into clojure.lang.PersistentQueue/EMPTY)
    "#clojure.ratio" (fn [[num denom]] (Ratio. num denom))
    "#clojure.symbol" symbol})
