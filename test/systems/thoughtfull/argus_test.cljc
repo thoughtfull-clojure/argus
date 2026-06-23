@@ -3,6 +3,68 @@
     [clojure.test :refer [are deftest is]]
     [systems.thoughtfull.argus :refer [argus deargus enargus]]))
 
+(deftest encode-default-types
+  (let [a (argus)]
+    (are [e o] (= e (enargus a o))
+      nil
+      nil
+      true
+      true
+      1
+      1
+      1.2
+      1.2
+      "foo"
+      "foo"
+      ["foo"]
+      ["foo"]
+      {"#set" [1]}
+      #{1}
+      {"#uuid" "2fd4edfd-50e5-45a1-90c7-b10b95fa2daa"}
+      #uuid "2fd4edfd-50e5-45a1-90c7-b10b95fa2daa")))
+
+(deftest decode-default-types
+  (let [a (argus)]
+    (are [o e] (= o (deargus a e))
+      nil
+      nil
+      true
+      true
+      1
+      1
+      1.2
+      1.2
+      "foo"
+      "foo"
+      ["foo"]
+      ["foo"]
+      #{1}
+      {"#set" [1]}
+      #uuid "2fd4edfd-50e5-45a1-90c7-b10b95fa2daa"
+      {"#uuid" "2fd4edfd-50e5-45a1-90c7-b10b95fa2daa"})))
+
+(deftest encode-clojure-types
+  (let [a (argus)]
+    (are [e o] (= e (enargus a o))
+      [1 2] (map inc (range 2))
+      {"#clojure.keyword" "foo/bar"} :foo/bar
+      {"#clojure.symbol" "foo/bar"} 'foo/bar
+      {"#clojure.list" ["foo" "bar"]} (list "foo" "bar"))))
+
+(deftest decode-clojure-types
+  (let [a (argus)]
+    (are [o e] (= o (deargus a e))
+      :foo/bar {"#clojure.keyword" "foo/bar"}
+      'foo/bar {"#clojure.symbol" "foo/bar"}
+      (list "foo" "bar") {"#clojure.list" ["foo" "bar"]})
+    (is (list? (deargus a {"#clojure.list" ["foo" "bar"]})))))
+
+(deftest encode-non-simple-keys
+  (is (= {"#clojure.map" [["foo" "bar"] "baz"]} (enargus (argus) {["foo" "bar"] "baz"}))))
+
+(deftest decode-non-simple-keys
+  (is (= {["foo" "bar"] "baz"} (deargus (argus) {"#clojure.map" [["foo" "bar"] "baz"]}))))
+
 (defrecord CustomType [a b])
 
 (def custom-encoder
@@ -151,42 +213,5 @@
   (is (= #{1} (deargus (argus :decoders {"#foo" set}) {"#foo" [1]}))))
 
 (deftest custom-decoder-for-builtin-tag
-  ;; overriding the decoder for a builtin tag is not allowed
-  (is (= #{1} (deargus (argus :decoders {"#set" vec}) {"#set" [1]}))))
-
-(deftest encode-default-types
-  (let [a (argus)]
-    (are [e o] (= e (enargus a o))
-      {"#set" [1]}
-      #{1}
-      {"#uuid" "2fd4edfd-50e5-45a1-90c7-b10b95fa2daa"}
-      #uuid "2fd4edfd-50e5-45a1-90c7-b10b95fa2daa")))
-
-(deftest decode-default-types
-  (let [a (argus)]
-    (are [o e] (= o (deargus a e))
-      #{1}
-      {"#set" [1]}
-      #uuid "2fd4edfd-50e5-45a1-90c7-b10b95fa2daa"
-      {"#uuid" "2fd4edfd-50e5-45a1-90c7-b10b95fa2daa"})))
-
-(deftest encode-clojure-types
-  (let [a (argus)]
-    (are [e o] (= e (enargus a o))
-      {"#clojure.keyword" "foo/bar"} :foo/bar
-      {"#clojure.symbol" "foo/bar"} 'foo/bar
-      {"#clojure.list" ["foo" "bar"]} (list "foo" "bar"))))
-
-(deftest decode-clojure-types
-  (let [a (argus)]
-    (are [o e] (= o (deargus a e))
-      :foo/bar {"#clojure.keyword" "foo/bar"}
-      'foo/bar {"#clojure.symbol" "foo/bar"}
-      (list "foo" "bar") {"#clojure.list" ["foo" "bar"]})
-    (is (list? (deargus a {"#clojure.list" ["foo" "bar"]})))))
-
-(deftest encode-non-simple-keys
-  (is (= {"#clojure.map" [["foo" "bar"] "baz"]} (enargus (argus) {["foo" "bar"] "baz"}))))
-
-(deftest decode-non-simple-keys
-  (is (= {["foo" "bar"] "baz"} (deargus (argus) {"#clojure.map" [["foo" "bar"] "baz"]}))))
+  ;; overriding the decoder for a builtin tag is allowed
+  (is (= [1] (deargus (argus :decoders {"#set" vec}) {"#set" [1]}))))
