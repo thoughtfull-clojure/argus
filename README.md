@@ -57,7 +57,6 @@ And like Transit, argus tags data and is extensible.
 
 ### What argus does NOT do
 
-- Support arbitrary objects as map keys (keys must be keywords, symbols, or strings).
 - Depend on Jackson and all its dependency nonsense
 - Include a JSON reader/writer (you need to bring your own and could use Jackson if you like
   dependency nonsense)
@@ -115,14 +114,14 @@ user> (argus/deargus (argus/argus) {"#set" [1 3 2]})
 user> (defrecord CustomType [a b])
 user.CustomType
 
-user> (def a (argus/argus :encoders {CustomType ["#my/type" (juxt :a :b)]}
-                          :decoders {"#my/type" (partial apply ->CustomType)}))
+user> (def a (argus/argus :encoders {CustomType ["#my.type" (juxt :a :b)]}
+                          :decoders {"#my.type" (partial apply ->CustomType)}))
 #'user/a
 
 user> (argus/enargus a (->CustomType 1 2))
-{"#my/type" [1 2]}
+{"#my.type" [1 2]}
 
-user> (argus/deargus a {"#my/type" [1 2]})
+user> (argus/deargus a {"#my.type" [1 2]})
 #user.CustomType{:a 1, :b 2}
 ```
 
