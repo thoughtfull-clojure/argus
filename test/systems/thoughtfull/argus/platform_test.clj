@@ -45,3 +45,14 @@
   (is (= {"#date" "2025-12-01"}
         (enargus (argus :encoders {CustomType (fn [_] (LocalDate/of 2025 12 1))})
           (map->CustomType {})))))
+
+(deftest override-builtin-encoder
+  (is (= {"#argus.test.sorted-map" [["a" 1] ["b" 2]]}
+        (enargus (argus :encoders {clojure.lang.PersistentTreeMap
+                                   ["#argus.test.sorted-map" (fn [o] (mapv vec o))]})
+          (sorted-map "b" 2 "a" 1)))))
+
+(deftest encode-sequential-types
+  (is (= {"#argus.test.sorted-set" [1 2]}
+        (enargus (argus :encoders {clojure.lang.PersistentTreeSet ["#argus.test.sorted-set" seq]})
+          (sorted-set 2 1)))))
