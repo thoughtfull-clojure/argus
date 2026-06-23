@@ -9,39 +9,35 @@
 (set! *warn-on-reflection* true)
 
 (defn- find-base-encoder
-  [cache c]
+  [encoders c]
   (if (and c (not= Object c))
-    (if (contains? cache c)
-      (get cache c)
-      (find-base-encoder cache (Class/.getSuperclass c)))
+    (if (contains? encoders c)
+      (get encoders c)
+      (find-base-encoder encoders (Class/.getSuperclass c)))
     ::missing))
 
 (defn- find-interface-encoder
-  ([cache c]
-   (find-interface-encoder cache c c nil (Class/.getInterfaces c)))
-  ([cache c b encoder ^objects ii]
+  ([encoders c]
+   (find-interface-encoder encoders c c nil (Class/.getInterfaces c)))
+  ([encoders c b encoder ^objects ii]
    (let [len (alength ii)]
      (loop [encoder encoder
             j 0]
        (if (and b (not= Object b))
          (if (< j len)
-           (if-let [encoder' (get cache (aget ii j))]
+           (if-let [encoder' (get encoders (aget ii j))]
              (do (when encoder (throw (ex-info "multiple encoders" {:class c})))
                (recur encoder' (inc j)))
              (recur  encoder (inc j)))
            (let [b (Class/.getSuperclass b)]
-             (find-interface-encoder cache c b encoder (Class/.getInterfaces b))))
+             (find-interface-encoder encoders c b encoder (Class/.getInterfaces b))))
          encoder)))))
 
 (defn find-encoder
-  [cache c]
-  (let [cache' @cache
-        encoder (find-base-encoder cache' c)]
+  [encoders c]
+  (let [encoder (find-base-encoder encoders c)]
     (if (= encoder ::missing)
-      (let [encoder (find-interface-encoder cache' c)]
-        (when (not (contains? @cache c))
-          (swap! cache #(if (contains? % c) % (assoc % c encoder))))
-        encoder)
+      (find-interface-encoder encoders c)
       encoder)))
 
 (def ^DateTimeFormatter instant-formatter

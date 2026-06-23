@@ -5,10 +5,8 @@
     (goog.date Date)))
 
 (defn find-encoder
-  [cache c]
-  (when-let [encoder (get @cache c)]
-    (swap! cache assoc c encoder)
-    encoder))
+  [encoders c]
+  (get encoders c))
 
 (def default-encoders
   {cljs.core/PersistentHashSet (fn [o] {"#set" (vec o)})

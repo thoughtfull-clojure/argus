@@ -48,13 +48,13 @@
   "Encode objects from the inside out.  Map keys are encoded specially so strings, symbols, and
   keywords can be distinguished (a keyword starts with a colon, a symbol starts with a quote, a
   string starting with a colon or quote is escaped)."
-  [cache m]
+  [find-encoder m]
   (transient
     {"#clojure.map"
      (persistent!
        (reduce-kv
          (fn [m k v]
-           (conj! m [(enargus* cache k) (enargus* cache v)]))
+           (conj! m [(enargus* find-encoder k) (enargus* find-encoder v)]))
          (transient [])
          m))}))
 
@@ -62,13 +62,13 @@
   "Encode objects from the inside out.  Map keys are encoded specially so strings, symbols, and
   keywords can be distinguished (a keyword starts with a colon, a symbol starts with a quote, a
   string starting with a colon or quote is escaped)."
-  [cache m]
+  [find-encoder m]
   (-> (reduce-kv
         (fn [m' k v]
           (if (not (or (keyword? k) (symbol? k) (string? k)))
-            (reduced (enargus-complex-key-map cache m))
+            (reduced (enargus-complex-key-map find-encoder m))
             (let [k' (enargus-key k)]
-              (cond-> (assoc! m' k' (enargus* cache v))
+              (cond-> (assoc! m' k' (enargus* find-encoder v))
                 (not= k k') (dissoc! k)))))
         (transient (hash-map))
         m)
@@ -76,24 +76,24 @@
     (with-meta (meta m))))
 
 (defn- enargus-sequential
-  [cache v]
+  [find-encoder v]
   (->
-    (into [] (map (partial enargus* cache)) v)
+    (into [] (map (partial enargus* find-encoder)) v)
     (with-meta (meta v))))
 
 (defn- enargus*
-  [cache o]
+  [find-encoder o]
   (if (or (nil? o) (boolean? o) (int? o) (double? o) (string? o))
     o
     (let [c (type o)
-          encoder (find-encoder cache c)]
+          encoder (find-encoder c)]
       (cond
         encoder
-        (enargus* cache (encoder o))
+        (enargus* find-encoder (encoder o))
         (and (map? o) (not (record? o)))
-        (enargus-map cache o)
+        (enargus-map find-encoder o)
         (sequential? o)
-        (enargus-sequential cache o)
+        (enargus-sequential find-encoder o)
         :else
         (throw (ex-info "missing encoder" {:type c}))))))
 
@@ -125,7 +125,7 @@
   - **`argus`** — an argus specification produced by [[argus]].
   - **`value`** — a Clojure value to encode."
   [argus value]
-  (enargus* (:cache argus) value))
+  (enargus* (:find-encoder argus) value))
 
 (declare deargus)
 
@@ -322,9 +322,9 @@
   - **`decoders`** (optional) — a map from extension tag to decoder.
   - **`default-decoder`** (optional) — a two-argument function, defaults to `default-decoder`."
   [& {:keys [encoders decoders default-decoder]}]
-  (let [encoders' (merge default-encoders (zipmap (keys encoders) (map ->encoder (vals encoders))))]
-    {:cache (atom encoders')
-     :encoders encoders'
+  (let [encoders (merge default-encoders (zipmap (keys encoders) (map ->encoder (vals encoders))))]
+    {:encoders encoders
      :decoders (merge default-decoders
                  (zipmap (map valid-decoder-tag (keys decoders)) (vals decoders)))
-     :default-decoder default-decoder}))
+     :default-decoder default-decoder
+     :find-encoder (memoize (partial find-encoder encoders))}))
