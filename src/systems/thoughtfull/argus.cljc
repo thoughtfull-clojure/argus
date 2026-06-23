@@ -68,7 +68,7 @@
             (let [k' (enargus-key k)]
               (cond-> (assoc! m k' (enargus* cache v))
                 (not= k k') (dissoc! k)))))
-        (transient m)
+        (transient {})
         m)
     persistent!
     (with-meta (meta m))))
