@@ -166,23 +166,15 @@
         (let [decoder (or (:default-decoder argus)
                         default-decoder)]
           (decoder t v'))))
-    (if #?(:clj (instance? clojure.lang.IEditableCollection m) :cljs false)
-      (-> (reduce-kv
-            (fn [m k v]
-              (let [k' (deargus-key k)]
-                (cond-> (assoc! m k' (deargus argus v))
-                  (not= k k') (dissoc! m k))))
-            (transient m)
-            m)
-        persistent!
-        (with-meta (meta m)))
-      (reduce-kv
-        (fn [m k v]
-          (let [k' (deargus-key k)]
-            (cond-> (assoc m k' (deargus argus v))
-              (not= k k') (dissoc m k))))
-        m
-        m))))
+    (-> (reduce-kv
+          (fn [m k v]
+            (let [k' (deargus-key k)]
+              (cond-> (assoc! m k' (deargus argus v))
+                (not= k k') (dissoc! m k))))
+          (transient m)
+          m)
+      persistent!
+      (with-meta (meta m)))))
 
 (defn- deargus-vector
   [argus v]
