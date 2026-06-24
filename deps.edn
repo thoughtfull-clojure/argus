@@ -1,4 +1,9 @@
-{:aliases {:build {:deps {systems.thoughtfull/build {:mvn/version "0.5.0"}}
+{:aliases {;; clojars creds at ~/.clojars.edn
+           ;; {:username "<USERNAME>" :password "<DEPLOY TOKEN>"}
+           ;;
+           ;; clj -X:build systems.thoughtfull/jar
+           ;; clj -X:build systems.thoughtfull/deploy
+           :build {:deps {systems.thoughtfull/build {:mvn/version "0.5.0"}}
                    :ns-default systems.thoughtfull.build}
            ;; clj -X:doc -> target/doc
            :doc {:extra-deps {codox/codox {:mvn/version "0.10.8"}}
