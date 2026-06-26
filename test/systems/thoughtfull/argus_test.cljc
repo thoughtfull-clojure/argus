@@ -206,3 +206,11 @@
 (deftest custom-decoder-for-builtin-tag
   ;; overriding the decoder for a builtin tag is allowed
   (is (= [1] (deargus (argus :decoders {"#set" vec}) {"#set" [1]}))))
+
+(deftest quote-non-tagged-value
+  (is (= {"##general" {":type" "slack-channel"}}
+        (enargus (argus) {"#general" {:type "slack-channel"}}))))
+
+(deftest unquote-non-tagged-value
+  (is (= {"#general" {:type "slack-channel"}}
+        (deargus (argus) {"##general" {":type" "slack-channel"}}))))

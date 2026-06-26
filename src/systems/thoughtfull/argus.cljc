@@ -1,5 +1,6 @@
 (ns systems.thoughtfull.argus
   (:require
+    [clojure.string :as str]
     [systems.thoughtfull.argus.platform :refer [default-decoders default-encoders find-encoder]]
     [systems.thoughtfull.argus.utils :refer [ident]]))
 
@@ -81,6 +82,11 @@
     (into [] (map (partial enargus* find-encoder)) v)
     (with-meta (meta v))))
 
+(defn- tagged-value
+  [o]
+  (when (tagged-value? o)
+    (first o)))
+
 (defn- enargus*
   [find-encoder o]
   (cond
@@ -91,12 +97,19 @@
     o
     (int? o)
     {"#integer" (str o)}
+    (tagged-value? o)
+    (let [[t v] (tagged-value o)]
+      {(str "#" t) (enargus* find-encoder v)})
     :else
     (let [c (type o)
           encoder (find-encoder c)]
       (cond
         encoder
-        (enargus* find-encoder (encoder o))
+        (let [v (encoder o)]
+          (if (tagged-value? v)
+            (let [[t v] (tagged-value v)]
+              {t (enargus* find-encoder v)})
+            (enargus* find-encoder v)))
         (and (map? o) (not (record? o)))
         (enargus-map find-encoder o)
         (sequential? o)
@@ -135,11 +148,6 @@
   (enargus* (:find-encoder argus) value))
 
 (declare deargus)
-
-(defn- tagged-value
-  [o]
-  (when (tagged-value? o)
-    (first o)))
 
 (defn deargus-key
   "Decode a string into an appropriate map key.
@@ -181,14 +189,16 @@
   [argus m]
   (if-let [[t v] (tagged-value m)]
     (let [v' (deargus argus v)]
-      (if-some [decoder (-> argus :decoders (get t))]
-        (try
-          (decoder v')
-          (catch #?(:clj Exception :cljs js/Object) _
-            m))
-        (let [decoder (or (:default-decoder argus)
-                        default-decoder)]
-          (decoder t v'))))
+      (if (str/starts-with? t "##")
+        {(subs t 1) v'}
+        (if-some [decoder (-> argus :decoders (get t))]
+          (try
+            (decoder v')
+            (catch #?(:clj Exception :cljs js/Object) _
+              m))
+          (let [decoder (or (:default-decoder argus)
+                          default-decoder)]
+            (decoder t v')))))
     (-> (reduce-kv
           (fn [m k v]
             (let [k' (deargus-key k)]
