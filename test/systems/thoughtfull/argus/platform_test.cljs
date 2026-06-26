@@ -62,3 +62,8 @@
 
 (deftest decode-big-integer
   (is (= {"#integer" "9223372036854775808"} (deargus (argus) {"#integer" "9223372036854775808"}))))
+
+(deftest decode-error
+  (is (= {"#foo" "bar"}
+        (deargus (argus :decoders {"#foo" (fn [_] (throw js/Error))})
+          {"#foo" "bar"}))))

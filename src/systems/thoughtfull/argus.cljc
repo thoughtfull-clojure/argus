@@ -182,7 +182,10 @@
   (if-let [[t v] (tagged-value m)]
     (let [v' (deargus argus v)]
       (if-some [decoder (-> argus :decoders (get t))]
-        (decoder v')
+        (try
+          (decoder v')
+          (catch #?(:clj Exception :cljs js/Object) _
+            m))
         (let [decoder (or (:default-decoder argus)
                         default-decoder)]
           (decoder t v'))))
