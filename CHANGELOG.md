@@ -87,7 +87,8 @@ project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.ht
 
 - Initial release.
 
-[unreleased]: https://github.com/thoughtfull-clojure/argus/compare/v0.5.0...main
+[unreleased]: https://github.com/thoughtfull-clojure/argus/compare/v0.6.0...main
+[0.6.0]: https://github.com/thoughtfull-clojure/argus/releases/tag/v0.5.0..v0.6.0
 [0.5.0]: https://github.com/thoughtfull-clojure/argus/releases/tag/v0.4.0..v0.5.0
 [0.4.0]: https://github.com/thoughtfull-clojure/argus/releases/tag/v0.3.2..v0.4.0
 [0.3.2]: https://github.com/thoughtfull-clojure/argus/releases/tag/v0.3.1..v0.3.2
