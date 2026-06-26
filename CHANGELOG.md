@@ -17,6 +17,13 @@ project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.ht
 
 ### Fixed
 
+## [0.6.0] - 2026-06-25
+
+### Added
+
+- Support `#integer` tag
+- If a decoder throws, then just return the tagged value
+
 ## [0.5.0] - 2026-06-23
 
 ### Added
