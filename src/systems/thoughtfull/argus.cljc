@@ -83,8 +83,15 @@
 
 (defn- enargus*
   [find-encoder o]
-  (if (or (nil? o) (boolean? o) (int? o) (double? o) (string? o))
+  (cond
+    ;; JavaScript... weird but true
+    (or (nil? o) (boolean? o) (and (double? o) (not (int? o))) (string? o))
     o
+    (and (int? o) (<= -9007199254740991 o 9007199254740991))
+    o
+    (int? o)
+    {"#integer" (str o)}
+    :else
     (let [c (type o)
           encoder (find-encoder c)]
       (cond

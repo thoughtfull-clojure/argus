@@ -3,7 +3,8 @@
     [clojure.test :refer [are deftest is]]
     [systems.thoughtfull.argus :refer [argus deargus enargus]])
   (:import
-    (goog.date Date)))
+    (goog.date Date)
+    (goog.math Long)))
 
 (deftest encode-default-types
   (let [a (argus)]
@@ -51,3 +52,13 @@
   (is (= {"#argus.test.sorted-set" [1 2]}
         (enargus (argus :encoders {cljs.core/PersistentTreeSet ["#argus.test.sorted-set" seq]})
           (sorted-set 2 1)))))
+
+(deftest encode-64-bit-integer
+  (is (= {"#integer" "9007199254740992"} (enargus (argus) (Long/fromString "9007199254740992")))))
+
+(deftest decode-64-bit-integer
+  (is (.equals (Long/fromString "9007199254740992")
+        (deargus (argus) {"#integer" "9007199254740992"}))))
+
+(deftest decode-big-integer
+  (is (= {"#integer" "9223372036854775808"} (deargus (argus) {"#integer" "9223372036854775808"}))))

@@ -56,3 +56,12 @@
   (is (= {"#argus.test.sorted-set" [1 2]}
         (enargus (argus :encoders {clojure.lang.PersistentTreeSet ["#argus.test.sorted-set" seq]})
           (sorted-set 2 1)))))
+
+(deftest encode-64-bit-integer
+  (is (= {"#integer" "9007199254740992"} (enargus (argus) 9007199254740992))))
+
+(deftest decode-64-bit-integer
+  (is (= 9007199254740992 (deargus (argus) {"#integer" "9007199254740992"}))))
+
+(deftest decode-big-integer
+  (is (= 9223372036854775808N (deargus (argus) {"#integer" "9223372036854775808"}))))

@@ -2,7 +2,8 @@
   (:require
     [systems.thoughtfull.argus.utils :refer [ident]])
   (:import
-    (goog.date Date)))
+    (goog.date Date)
+    (goog.math Long)))
 
 (defn find-encoder
   [encoders c]
@@ -23,6 +24,9 @@
   {"#set" set
    "#date" #(Date/fromIsoString %)
    "#instant" #(js/Date. %)
+   "#integer" #(if (Long/isStringInRange %)
+                 (Long/fromString %)
+                 {"#integer" %})
    "#uuid" parse-uuid
    "#clojure.keyword" keyword
    "#clojure.list" (partial apply list)

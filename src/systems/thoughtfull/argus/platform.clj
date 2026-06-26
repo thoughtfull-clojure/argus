@@ -71,6 +71,7 @@
   {"#set" set
    "#date" java.time.LocalDate/parse
    "#instant" java.time.Instant/parse
+   "#integer" #(or (parse-long %) (bigint %))
    "#uuid" parse-uuid
    "#clojure.bigdec" bigdec
    "#clojure.bigint" bigint
