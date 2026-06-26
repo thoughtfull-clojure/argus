@@ -84,8 +84,8 @@ I wouldn't say that performance is not a concern, but my top priorities are:
 2. Human readability
 3. Support for both Clojure and ClojureScript
 
-That said, I want argus to be performant, and I have tried to make it performant when I can.  If you
-have performance improvements, I'm happy to take them.
+That said, I want argus to be performant, and I have tried to make it performant.  If you have
+performance improvements, I'm happy to take them.
 
 ## Examples
 
