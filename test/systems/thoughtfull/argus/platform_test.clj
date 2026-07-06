@@ -21,6 +21,14 @@
       (java.time.Instant/ofEpochMilli 987)
       {"#instant" "1970-01-01T00:00:00.987Z"})))
 
+(deftest decode-default-types-failures
+  (let [a (argus)]
+    (are [o e] (= o (deargus a e))
+      {"#date" "foo"} {"#date" "foo"}
+      {"#date" 42} {"#date" 42}
+      {"#instant" "foo"} {"#instant" "foo"}
+      {"#instant" 42} {"#instant" 42})))
+
 (deftest encode-clojure-types
   (let [a (argus)]
     (are [e o] (= e (enargus a o))
@@ -38,6 +46,17 @@
       9223372036854775808M {"#clojure.bigdec" "9223372036854775808"}
       (into clojure.lang.PersistentQueue/EMPTY [1 2]) {"#clojure.queue" [1 2]}
       2/3 {"#clojure.ratio" [{"#clojure.biginteger" "2"} {"#clojure.biginteger" "3"}]})))
+
+(deftest decode-clojure-types-failures
+  (let [a (argus)]
+    (are [o e] (= o (deargus a e))
+      {"#clojure.bigint" "foo"} {"#clojure.bigint" "foo"}
+      {"#clojure.biginteger" "foo"} {"#clojure.biginteger" "foo"}
+      {"#clojure.bigdec" "foo"} {"#clojure.bigdec" "foo"}
+      {"#clojure.queue" "foo"} {"#clojure.queue" "foo"}
+
+      {"#clojure.ratio" [{"#clojure.biginteger" "foo"} {"#clojure.biginteger" "foo"}]}
+      {"#clojure.ratio" [{"#clojure.biginteger" "foo"} {"#clojure.biginteger" "foo"}]})))
 
 (defrecord CustomType [a b])
 
@@ -65,6 +84,11 @@
 
 (deftest decode-big-integer
   (is (= 9223372036854775808N (deargus (argus) {"#integer" "9223372036854775808"}))))
+
+(deftest encode-error
+  (is (thrown? Exception
+        (enargus (argus :encoders {CustomType (fn [_] (throw (Exception.)))})
+          (map->CustomType {})))))
 
 (deftest decode-error
   (is (= {"#foo" "bar"}

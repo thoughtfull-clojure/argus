@@ -20,6 +20,14 @@
       (js/Date. 987)
       {"#instant" "1970-01-01T00:00:00.987Z"})))
 
+(deftest decode-default-types-failures
+  (let [a (argus)]
+    (are [o e] (= o (deargus a e))
+      {"#date" "foo"} {"#date" "foo"}
+      {"#date" 42} {"#date" 42}
+      {"#instant" "foo"} {"#instant" "foo"}
+      {"#instant" 42} {"#instant" 42})))
+
 ;; I guess equality is hard?
 (deftest decode-goog-date
   (is (.equals (Date/fromIsoString "2025-07-09")
@@ -34,6 +42,11 @@
   (let [a (argus)]
     (are [o e] (= o (deargus a e))
       (into cljs.core/PersistentQueue.EMPTY [1 2]) {"#clojure.queue" [1 2]})))
+
+(deftest decode-clojure-types-failures
+  (let [a (argus)]
+    (are [o e] (= o (deargus a e))
+      {"#clojure.queue" "foo"} {"#clojure.queue" "foo"})))
 
 (defrecord CustomType [a b])
 
@@ -62,6 +75,14 @@
 
 (deftest decode-big-integer
   (is (= {"#integer" "9223372036854775808"} (deargus (argus) {"#integer" "9223372036854775808"}))))
+
+(deftest encode-error
+  (try
+    (enargus (argus :encoders {CustomType (fn [_] (throw js/Error))})
+      (map->CustomType {}))
+    (is false)
+    (catch js/Object _
+      (is true))))
 
 (deftest decode-error
   (is (= {"#foo" "bar"}

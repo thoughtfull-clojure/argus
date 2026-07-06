@@ -68,17 +68,13 @@
    java.math.BigInteger (fn [o] {"#clojure.biginteger" (str o)})})
 
 (def default-decoders
-  {"#set" set
-   "#date" java.time.LocalDate/parse
+  {"#date" java.time.LocalDate/parse
    "#instant" java.time.Instant/parse
    "#integer" #(or (parse-long %) (bigint %))
-   "#uuid" parse-uuid
    "#clojure.bigdec" bigdec
    "#clojure.bigint" bigint
    "#clojure.biginteger" biginteger
-   "#clojure.keyword" keyword
-   "#clojure.list" (partial apply list)
-   "#clojure.map" (partial into {})
-   "#clojure.queue" (partial into clojure.lang.PersistentQueue/EMPTY)
-   "#clojure.ratio" (fn [[num denom]] (Ratio. num denom))
-   "#clojure.symbol" symbol})
+   "#clojure.queue" #(if (vector? %)
+                       (into clojure.lang.PersistentQueue/EMPTY %)
+                       {"#clojure.queue" %})
+   "#clojure.ratio" (fn [[num denom]] (Ratio. num denom))})

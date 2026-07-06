@@ -344,7 +344,14 @@
   [& {:keys [encoders decoders default-decoder]}]
   (let [encoders (merge default-encoders (zipmap (keys encoders) (map ->encoder (vals encoders))))]
     {:encoders encoders
-     :decoders (merge default-decoders
+     :decoders (merge
+                 {"#set" #(if (vector? %) (set %) {"#set" %})
+                  "#uuid" #(if-let [u (parse-uuid %)] u {"#uuid" %})
+                  "#clojure.keyword" #(if-let [k (keyword %)] k {"#clojure.keyword" %})
+                  "#clojure.list" (partial apply list)
+                  "#clojure.map" (partial into {})
+                  "#clojure.symbol" symbol}
+                 default-decoders
                  (zipmap (map valid-decoder-tag (keys decoders)) (vals decoders)))
      :default-decoder default-decoder
      :find-encoder (memoize (partial find-encoder encoders))}))

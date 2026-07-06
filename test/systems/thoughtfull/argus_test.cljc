@@ -35,6 +35,18 @@
       #uuid "2fd4edfd-50e5-45a1-90c7-b10b95fa2daa"
       {"#uuid" "2fd4edfd-50e5-45a1-90c7-b10b95fa2daa"})))
 
+(deftest decode-default-failures
+  (let [a (argus)]
+    (are [o e] (= o (deargus a e))
+      {"#set" "foo"}
+      {"#set" "foo"}
+      {"#set" 42}
+      {"#set" 42}
+      {"#uuid" "foo"}
+      {"#uuid" "foo"}
+      {"#uuid" 42}
+      {"#uuid" 42})))
+
 (deftest encode-clojure-types
   (let [a (argus)]
     (are [e o] (= e (enargus a o))
@@ -55,6 +67,14 @@
       'foo/bar {"#clojure.symbol" "foo/bar"}
       (list "foo" "bar") {"#clojure.list" ["foo" "bar"]})
     (is (list? (deargus a {"#clojure.list" ["foo" "bar"]})))))
+
+(deftest decode-clojure-types-failures
+  (let [a (argus)]
+    (are [o e] (= o (deargus a e))
+      {"#clojure.map" "foo"} {"#clojure.map" "foo"}
+      {"#clojure.keyword" 42} {"#clojure.keyword" 42}
+      {"#clojure.symbol" 42} {"#clojure.symbol" 42}
+      {"#clojure.list" 42} {"#clojure.list" 42})))
 
 (defrecord CustomType [a b])
 

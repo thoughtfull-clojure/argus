@@ -21,15 +21,17 @@
    cljs.core/Symbol (fn [o] {"#clojure.symbol" (ident o)})})
 
 (def default-decoders
-  {"#set" set
-   "#date" #(Date/fromIsoString %)
-   "#instant" #(js/Date. %)
-   "#integer" #(if (Long/isStringInRange %)
-                 (Long/fromString %)
-                 {"#integer" %})
-   "#uuid" parse-uuid
-   "#clojure.keyword" keyword
-   "#clojure.list" (partial apply list)
-   "#clojure.map" (partial into {})
-   "#clojure.queue" (partial into cljs.core/PersistentQueue.EMPTY)
-   "#clojure.symbol" symbol})
+  {"#date" #(if-let [d (Date/fromIsoString %)]
+              d
+              {"#date" %})
+   "#instant" #(if (string? %)
+                 (let [m (js/Date.parse %)]
+                   (if (and (not (js/isNaN m))
+                         (.isSafeInteger (Long/fromNumber m)))
+                     (doto (js/Date.) (.setTime m))
+                     {"#instant" %}))
+                 {"#instant" %})
+   "#integer" #(if (Long/isStringInRange %) (Long/fromString %) {"#integer" %})
+   "#clojure.queue" #(if (vector? %)
+                       (into cljs.core/PersistentQueue.EMPTY %)
+                       {"#clojure.queue" %})})
