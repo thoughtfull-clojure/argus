@@ -17,6 +17,13 @@ project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.ht
 
 ### Fixed
 
+## [0.8.0] - 2026-07-06
+
+### Changed
+
+- If an decoder (including builtin) cannot properly parse or throws an exception, then return the
+  unparsed tagged value.
+
 ## [0.7.0] - 2026-06-26
 
 ### Added
