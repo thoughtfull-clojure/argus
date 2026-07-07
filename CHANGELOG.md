@@ -9,6 +9,8 @@ project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.ht
 
 ### Added
 
+- `write-key` and `read-key` options for argus to transform keys (e.g., kebab-case<->snake_case).
+
 ### Changed
 
 ### Deprecated

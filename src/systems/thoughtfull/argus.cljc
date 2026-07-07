@@ -33,29 +33,38 @@
   are preserved.
 
   If a key is a string starting with a colon or quote, then the colon or quote is escaped by
-  doubling it."
-  [k]
-  (if (and (string? k) (pos? (count k)))
-    (let [f (subs k 0 1)]
-      (cond
-        (= ":" f) (str ":" k)
-        (= "'" f) (str "'" k)
-        :else k))
-    (if (symbol? k)
-      (str "'" k)
-      (str k))))
+  doubling it.
+
+  If given, write-key transforms a string key (minus the leading ':' for keywords) into a string
+  for output."
+  ([k]
+   (enargus-key k identity))
+  ([k write-key]
+   (if (and (string? k) (pos? (count k)))
+     (let [f (subs k 0 1)]
+       (cond
+         (= ":" f) (str ":" (write-key k))
+         (= "'" f) (str "'" (write-key k))
+         :else (write-key k)))
+     (cond
+       (symbol? k)
+       (str "'" (write-key (str k)))
+       (keyword? k)
+       (str ":" (write-key (subs (str k) 1)))
+       :else
+       (str (write-key k))))))
 
 (defn- enargus-complex-key-map
   "Encode objects from the inside out.  Map keys are encoded specially so strings, symbols, and
   keywords can be distinguished (a keyword starts with a colon, a symbol starts with a quote, a
   string starting with a colon or quote is escaped)."
-  [find-encoder m]
+  [find-encoder write-key m]
   (transient
     {"#clojure.map"
      (persistent!
        (reduce-kv
          (fn [m k v]
-           (conj! m [(enargus* find-encoder k) (enargus* find-encoder v)]))
+           (conj! m [(enargus* find-encoder write-key k) (enargus* find-encoder write-key v)]))
          (transient [])
          m))}))
 
@@ -63,13 +72,13 @@
   "Encode objects from the inside out.  Map keys are encoded specially so strings, symbols, and
   keywords can be distinguished (a keyword starts with a colon, a symbol starts with a quote, a
   string starting with a colon or quote is escaped)."
-  [find-encoder m]
+  [find-encoder write-key m]
   (-> (reduce-kv
         (fn [m' k v]
           (if (not (or (keyword? k) (symbol? k) (string? k)))
-            (reduced (enargus-complex-key-map find-encoder m))
-            (let [k' (enargus-key k)]
-              (cond-> (assoc! m' k' (enargus* find-encoder v))
+            (reduced (enargus-complex-key-map find-encoder write-key m))
+            (let [k' (enargus-key k write-key)]
+              (cond-> (assoc! m' k' (enargus* find-encoder write-key v))
                 (not= k k') (dissoc! k)))))
         (transient (hash-map))
         m)
@@ -77,9 +86,9 @@
     (with-meta (meta m))))
 
 (defn- enargus-sequential
-  [find-encoder v]
+  [find-encoder write-key v]
   (->
-    (into [] (map (partial enargus* find-encoder)) v)
+    (into [] (map (partial enargus* find-encoder write-key)) v)
     (with-meta (meta v))))
 
 (defn- tagged-value
@@ -88,7 +97,7 @@
     (first o)))
 
 (defn- enargus*
-  [find-encoder o]
+  [find-encoder write-key o]
   (cond
     ;; JavaScript... weird but true
     (or (nil? o) (boolean? o) (and (double? o) (not (int? o))) (string? o))
@@ -99,7 +108,7 @@
     {"#integer" (str o)}
     (tagged-value? o)
     (let [[t v] (tagged-value o)]
-      {(str "#" t) (enargus* find-encoder v)})
+      {(str "#" t) (enargus* find-encoder write-key v)})
     :else
     (let [c (type o)
           encoder (find-encoder c)]
@@ -108,12 +117,12 @@
         (let [v (encoder o)]
           (if (tagged-value? v)
             (let [[t v] (tagged-value v)]
-              {t (enargus* find-encoder v)})
-            (enargus* find-encoder v)))
+              {t (enargus* find-encoder write-key v)})
+            (enargus* find-encoder write-key v)))
         (and (map? o) (not (record? o)))
-        (enargus-map find-encoder o)
+        (enargus-map find-encoder write-key o)
         (sequential? o)
-        (enargus-sequential find-encoder o)
+        (enargus-sequential find-encoder write-key o)
         :else
         (throw (ex-info "missing encoder" {:type c}))))))
 
@@ -145,7 +154,7 @@
   - **`argus`** — an argus specification produced by [[argus]].
   - **`value`** — a Clojure value to encode."
   [argus value]
-  (enargus* (:find-encoder argus) value))
+  (enargus* (:find-encoder argus) (:write-key argus) value))
 
 (declare deargus)
 
@@ -159,19 +168,24 @@
   are preserved.
 
   If a key is a string starting with two colons or two quotes, then one colon or quote is removed
-  and the rest of the string is returned unmodified."
-  [k]
-  (if (and (string? k) (> (count k) 1))
-    (cond
-      (or (= "::" (subs k 0 2)) (= "''" (subs k 0 2)))
-      (subs k 1)
-      (= ":" (subs k 0 1))
-      (keyword (subs k 1))
-      (= "'" (subs k 0 1))
-      (symbol (subs k 1))
-      :else
-      k)
-    k))
+  and the rest of the string is returned unmodified.
+
+  If given, read-key transforms a string key into a string for Clojure before it is converted into
+  a keyword, symbol, etc."
+  ([k]
+   (deargus-key k identity))
+  ([k read-key]
+   (if (and (string? k) (> (count k) 1))
+     (cond
+       (or (= "::" (subs k 0 2)) (= "''" (subs k 0 2)))
+       (read-key (subs k 1))
+       (= ":" (subs k 0 1))
+       (keyword (read-key (subs k 1)))
+       (= "'" (subs k 0 1))
+       (symbol (read-key (subs k 1)))
+       :else
+       (read-key k))
+     k)))
 
 (defn default-decoder
   "Takes a tag and value and returns a tagged value.
@@ -186,7 +200,7 @@
   {tag value})
 
 (defn- deargus-map
-  [argus m]
+  [{:as argus :keys [read-key]} m]
   (if-let [[t v] (tagged-value m)]
     (let [v' (deargus argus v)]
       (if (str/starts-with? t "##")
@@ -201,7 +215,7 @@
             (decoder t v')))))
     (-> (reduce-kv
           (fn [m k v]
-            (let [k' (deargus-key k)]
+            (let [k' (deargus-key k read-key)]
               (cond-> (assoc! m k' (deargus argus v))
                 (not= k k') (dissoc! m k))))
           (transient m)
@@ -330,6 +344,9 @@
   Each decoder tag in the specification is validated, and if a tag is not a valid extension tag,
   then an error is thrown.
 
+  If you'd like to do kebab-case<->snake_case conversions (or other key transformations), use
+  write-key and read-key.
+
   Example:
 
   ```clojure
@@ -340,8 +357,13 @@
 
   - **`encoders`** (optional) — a map from type to encoder.
   - **`decoders`** (optional) — a map from extension tag to decoder.
-  - **`default-decoder`** (optional) — a two-argument function, defaults to `default-decoder`."
-  [& {:keys [encoders decoders default-decoder]}]
+  - **`default-decoder`** (optional) — a two-argument function, defaults to `default-decoder`.
+  - **`write-key`** (optional) — a one-argument string-to-string function taking a Clojure map key
+    as a string (minus the leading ':' for keywords) and transforming it for output, defaults to
+    identity.
+  - **`read-key`** (optional) — a one-argument string-to-string function taking a map key string and
+    transforming it for use in Clojure, defaults to identity."
+  [& {:keys [encoders decoders default-decoder read-key write-key]}]
   (let [encoders (merge default-encoders (zipmap (keys encoders) (map ->encoder (vals encoders))))]
     {:encoders encoders
      :decoders (merge
@@ -354,4 +376,6 @@
                  default-decoders
                  (zipmap (map valid-decoder-tag (keys decoders)) (vals decoders)))
      :default-decoder default-decoder
-     :find-encoder (memoize (partial find-encoder encoders))}))
+     :find-encoder (memoize (partial find-encoder encoders))
+     :read-key (or read-key identity)
+     :write-key (or write-key identity)}))

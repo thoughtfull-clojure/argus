@@ -1,5 +1,6 @@
 (ns systems.thoughtfull.argus-test
   (:require
+    [clojure.string :as str]
     [clojure.test :refer [are deftest is]]
     [systems.thoughtfull.argus :refer [argus deargus enargus]]))
 
@@ -234,3 +235,16 @@
 (deftest unquote-non-tagged-value
   (is (= {"#general" {:type "slack-channel"}}
         (deargus (argus) {"##general" {":type" "slack-channel"}}))))
+
+(deftest custom-key-transform
+  (let [original {:foo-bar [{:baz-quux 42} (->CustomType 1 2)]
+                  'baz-quux {"bar-baz" 36}}
+        argused {":foo_bar" [{":baz_quux" 42} {"#my.custom-type" [1 2]}]
+                 "'baz_quux" {"bar_baz" 36}}
+        a (argus
+            :encoders {CustomType ["#my.custom-type" custom-encoder]}
+            :decoders {"#my.custom-type" (partial apply ->CustomType)}
+            :write-key #(str/replace % "-" "_")
+            :read-key #(str/replace % "_" "-"))]
+    (is (= argused (enargus a original)))
+    (is (= original (deargus a argused)))))
