@@ -31,11 +31,17 @@ A tagged value is a map with a single key/value pair where the key is a tag.  Fo
 
 *For more information see the [Argus "manifesto."](https://argus.fyi/)*
 
-Tagged values are a good idea!  This is not an entirely new idea.  MongoDB has an [Extended
+Tagged values are a good idea!  This is not an entirely new idea.  Existing options either do not
+allow extension, are restricted to specific platforms/libraries, are complex, or are not human
+readable.
+
+[TJSON](http://tjson.org/) is not extensible and tags fields, not values.
+
+MongoDB has an [Extended
 JSON](https://www.mongodb.com/docs/manual/reference/mongodb-extended-json/#std-label-mongodb-extended-json-v2)
 format.  DynamoDB has [Data Type
 Descriptors](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.NamingRulesDataTypes.html#HowItWorks.DataTypeDescriptors).
-Neither of these are user extensible and available as external an library.
+Neither of these are user extensible and available as an external library.
 
 The [jsonista](https://github.com/metosin/jsonista/tree/master?tab=readme-ov-file#tagged-json)
 library has an object mapper for reading and writing arbitrary tagged JSON data, but it is a
@@ -44,18 +50,22 @@ JVM-only library.
 In the Clojure/Script world there are two other ways to use tagged values (EDN and Transit), so one
 could reasonably ask why another library/format/etc.?
 
-In particular argus overlaps with Transit.  Like Transit, argus embraces JSON for its universality.
-And like Transit, argus tags data and is extensible.
+In particular Argus overlaps with Transit.  Like Transit, Argus embraces JSON for its universality.
+And like Transit, Argus tags data and is extensible.
 
-### What argus does
+Unlike Transit, you can use any JSON library (or a non-JSON library, if you'd like!).  And unlike
+Transit, Argus is a very simple, regular parse, and Argus makes it easy to define encoders/decoders
+with plain functions.
 
-- En/decode local date, instant, set, and UUID values.
-- Extend en/decoding for arbitrary types.
-- Transparently en/decode keywords, symbols, and strings as map keys.
+### What Argus does
+
+- Encode/decode local date, instant, set, and UUID values.
+- Extend encoding/decoding for arbitrary types.
+- Transparently encode/decode keywords, symbols, and strings as map keys.
 - Produce standard JSON values.
 - Produce human readable values.
 
-### What argus does NOT do
+### What Argus does NOT do
 
 - Depend on Jackson and all its dependency nonsense
 - Include a JSON reader/writer (you need to bring your own and could use Jackson if you like
@@ -64,13 +74,13 @@ And like Transit, argus tags data and is extensible.
 
 ### Summary
 
-argus technically isn't even a JSON library.  It just rewrites Clojure data to Clojure data that is restricted to valid JSON values.
+Argus technically isn't even a JSON library.  It just rewrites Clojure data to Clojure data that is restricted to valid JSON values.
 
 It works with both Clojure and ClojureScript, so it is suitable for sending rich data to and from backend and frontend.
 
 ## Do not keyword-ize map keys
 
-***Because argus transparently handles keywords, symbols, and strings as map keys, I do not
+***Because Argus transparently handles keywords, symbols, and strings as map keys, I do not
 recommend that you have your JSON library automatically convert map keys into keywords.  This will
 interfere with the map key decoding process, and there are some cases where it is useful to maintain
 string keys in data (for example, when dealing—not with "objects"—but "mappings" from one name to
@@ -84,7 +94,7 @@ I wouldn't say that performance is not a concern, but my top priorities are:
 2. Human readability
 3. Support for both Clojure and ClojureScript
 
-That said, I want argus to be performant, and I have tried to make it performant.  If you have
+That said, I want Argus to be performant, and I have tried to make it performant.  If you have
 performance improvements, I'm happy to take them.
 
 ## Examples
