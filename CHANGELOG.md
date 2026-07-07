@@ -9,8 +9,6 @@ project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.ht
 
 ### Added
 
-- `write-key` and `read-key` options for argus to transform keys (e.g., kebab-case<->snake_case).
-
 ### Changed
 
 ### Deprecated
@@ -18,6 +16,12 @@ project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.ht
 ### Removed
 
 ### Fixed
+
+## [0.9.0] - 2026-07-07
+
+### Added
+
+- `write-key` and `read-key` options for argus to transform keys (e.g., kebab-case<->snake_case).
 
 ## [0.8.0] - 2026-07-06
 
@@ -102,7 +106,8 @@ project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.ht
 
 - Initial release.
 
-[unreleased]: https://github.com/thoughtfull-clojure/argus/compare/v0.8.0...main
+[unreleased]: https://github.com/thoughtfull-clojure/argus/compare/v0.9.0...main
+[0.9.0]: https://github.com/thoughtfull-clojure/argus/releases/tag/v0.8.0..v0.9.0
 [0.8.0]: https://github.com/thoughtfull-clojure/argus/releases/tag/v0.7.0..v0.8.0
 [0.7.0]: https://github.com/thoughtfull-clojure/argus/releases/tag/v0.6.0..v0.7.0
 [0.6.0]: https://github.com/thoughtfull-clojure/argus/releases/tag/v0.5.0..v0.6.0
